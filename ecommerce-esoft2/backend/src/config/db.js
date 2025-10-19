@@ -1,6 +1,6 @@
 //Este arquivo conecta o Node ao MongoDB
 
-import mongose from 'mongoose';
+import mongoose from 'mongoose';
 import 'dotenv/config';
 
 const connectDB = async () => {
