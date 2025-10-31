@@ -11,7 +11,8 @@ const produtoEsquema = new mongoose.Schema({
 
     //Referências para outras coleções
     categoria: {type: mongoose.Schema.Types.ObjectId, ref: 'Categoria', required: true},
-    vendedor: {type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', reqiured: true},
+    //vendedor: {type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', reqiured: true},
+    vendedor: {type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: false},
 
     //Subdocumentos
     imagens: [{

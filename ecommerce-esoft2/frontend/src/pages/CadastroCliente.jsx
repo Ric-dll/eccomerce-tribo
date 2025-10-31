@@ -1,58 +1,197 @@
 import React, { useState } from 'react';
 import UsuarioService from '../services/UsuarioService';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+
+import {
+    Box,
+    TextField,
+    Button,
+    Typography,
+    Paper,
+    Alert,
+    CircularProgress,
+} from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
 
 function CadastroCliente() {
-    // Tarefa: Gerenciar o estado (useState) dos formulários
+
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        nome: '',
-        email: '',
-        senha: '',
-        cpf: '',
-        telefone: '',
-        dataNasc: '',
+        nome: '', email: '', senha: '', cpf: '', telefone: '', dataNasc: '',
     });
     
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    // Tarefa: Implementar o código que diz: "Quando o botão é clicado..."
-    const handleSubmit = async (e) => {
+   const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
+        setLoading(true);
 
         try {
-            // "...pegue os dados do estado e use o Service para enviar para a API."
             await UsuarioService.cadastrarCliente(formData);
+            
             setMessage('Cliente cadastrado com sucesso!');
             setFormData({ nome: '', email: '', senha: '', cpf: '', telefone: '', dataNasc: '' });
+            setTimeout(() => navigate('/clientes'), 1500);
+
         } catch (error) {
-            const errorMsg = error.response?.data?.mensagem || 'Erro ao cadastrar cliente.';
-            setMessage(errorMsg);
+            const errorMsg = error.response?.data?.mensagem || 'Falha de conexão com a API.';
+            const errorStatus = error.response?.status;
+            
+            setMessage(`Erro ao cadastrar cliente. Status: ${errorStatus || 'N/A'}. Mensagem: ${errorMsg}`);
+            
+        } finally {
+            setLoading(false);
         }
     };
-
-    // Estilos de esqueleto (Pessoa 3 irá refinar)
+    
     return (
-        <div className="p-4 bg-gray-900 min-h-screen text-white">
-            <h1 className="text-2xl font-bold mb-4">Cadastro de Cliente</h1>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md">
-                <input type="text" name="nome" placeholder="Nome" value={formData.nome} onChange={handleChange} className="p-2 bg-gray-700" required />
-                <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="p-2 bg-gray-700" required />
-                <input type="password" name="senha" placeholder="Senha" value={formData.senha} onChange={handleChange} className="p-2 bg-gray-700" required />
-                <input type="text" name="cpf" placeholder="CPF" value={formData.cpf} onChange={handleChange} className="p-2 bg-gray-700" />
-                <input type="tel" name="telefone" placeholder="Telefone" value={formData.telefone} onChange={handleChange} className="p-2 bg-gray-700" />
-                <input type="date" name="dataNasc" value={formData.dataNasc} onChange={handleChange} className="p-2 bg-gray-700" />
+        <Box 
+            sx={{ 
+                minHeight: '100vh', 
+                width: '100%',
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                backgroundColor: 'background.default', 
+                color: 'text.primary', 
+                // Adiciona padding vertical à página inteira para garantir espaço
+                py: 4, 
+            }}
+        >
+            <Box 
+                sx={{
+                    width: '100%',
+                    maxWidth: 500, 
+                    padding: 2, 
+                }}
+            >
+                {}
+                <Box
+                    component="img"
+                    src="/tribo" // <-- NOME DO ARQUIVO DA LOGO
+                    alt="Logo da Loja"
+                    sx={{
+                        width: 'auto',      
+                        maxHeight: '120px', // Altura máxima da logo
+                        mb: 3,             // Margem inferior (separa do Paper)
+                        display: 'block',  // Para centralizar com margin
+                        mx: 'auto'         // Centraliza horizontalmente
+                    }}
+                />
                 
-                <button type="submit" className="p-2 bg-blue-600 hover:bg-blue-700 rounded">Cadastrar</button>
-            </form>
-            {message && <p className="mt-4">{message}</p>}
-            <Link to="/clientes" className="text-blue-400 mt-4 inline-block">Ver Clientes</Link>
-        </div>
+                <Paper 
+                    elevation={10} 
+                    sx={{ 
+                        padding: 5, 
+                    }}
+                >
+                    <Typography 
+                        variant="h4" 
+                        component="h1" 
+                        gutterBottom 
+                        align="center" 
+                        color="text.primary"
+                        
+                        sx={{ mb: 4 }} 
+                    >
+                        Cadastro de Cliente
+                    </Typography>
+                    
+                    {message && (
+                        <Alert 
+                            severity={message.startsWith('Yes') ? 'success' : 'error'} 
+                            sx={{ mb: 2 }} 
+                        >
+                            {message}
+                        </Alert>
+                    )}
+
+                    <Box 
+                        component="form" 
+                        onSubmit={handleSubmit} 
+                        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+                    >
+                        {}
+                        <TextField 
+                            label="Nome" 
+                            name="nome" 
+                            value={formData.nome} 
+                            onChange={handleChange} 
+                            required 
+                            fullWidth
+                        />
+                        <TextField 
+                            label="Email" 
+                            name="email" 
+                            type="email" 
+                            value={formData.email} 
+                            onChange={handleChange} 
+                            required 
+                            fullWidth 
+                        />
+                        <TextField 
+                            label="Senha" 
+                            name="senha" 
+                            type="password" 
+                            value={formData.senha} 
+                            onChange={handleChange} 
+                            required 
+                            fullWidth 
+                        />
+                        <TextField 
+                            label="CPF" 
+                            name="cpf" 
+                            value={formData.cpf} 
+                            onChange={handleChange} 
+                            fullWidth 
+                        />
+                        <TextField 
+                            label="Telefone" 
+                            name="telefone" 
+                            type="tel" 
+                            value={formData.telefone} 
+                            onChange={handleChange} 
+                            fullWidth 
+                        />
+                        <TextField 
+                            label="Data de Nascimento" 
+                            name="dataNasc" 
+                            type="date" 
+                            value={formData.dataNasc} 
+                            onChange={handleChange} 
+                            fullWidth 
+                            InputLabelProps={{ shrink: true }}
+                        />
+                        
+                        <Button 
+                            type="submit" 
+                            disabled={loading}
+                            variant="outlined" 
+                            color="primary" 
+                            endIcon={!loading && <SendIcon />} 
+                            size="large" 
+                            sx={{ mt: 1 }}
+                        >
+                            {loading ? <CircularProgress size={24} color="inherit" /> : 'Cadastrar Cliente'}
+                        </Button>
+                    </Box>
+
+                    <Box sx={{ mt: 2, textAlign: 'center' }}>
+                        <Link to="/clientes" style={{ textDecoration: 'none' }}>
+                             <Typography color="primary" variant="body2">Ver Clientes</Typography>
+                        </Link>
+                    </Box>
+                </Paper>
+            </Box>
+        </Box>
     );
 }
 

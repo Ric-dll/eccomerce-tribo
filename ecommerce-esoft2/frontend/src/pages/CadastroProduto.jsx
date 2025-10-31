@@ -1,92 +1,277 @@
 import React, { useState, useEffect } from 'react';
 import ProdutoService from '../services/ProdutoService';
 import CategoriaService from '../services/CategoriaService';
-import UsuarioService from '../services/UsuarioService';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
+import {
+    Box,
+    TextField,
+    Button,
+    Typography,
+    Paper,
+    Alert,
+    CircularProgress,
+    Grid,       // Para o layout de 2 colunas
+    MenuItem,   // Para o Select
+    Container   // Para limitar a largura total
+} from '@mui/material';
+// --- Ícones do MUI ---
+import SendIcon from '@mui/icons-material/Send';
+import CancelIcon from '@mui/icons-material/Cancel';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera'; // Para o placeholder
 
 function CadastroProduto() {
+    const navigate = useNavigate(); 
+    
     const [formData, setFormData] = useState({
         nome: '',
         descricao: '',
         preco: '',
         estoque: '',
-        categoria: '', // Será o ID da categoria
-        vendedor: '',  // Será o ID do vendedor
+        categoria: '', 
     });
     
-    // Estados para armazenar as listas de categorias e vendedores
     const [categorias, setCategorias] = useState([]);
-    const [vendedores, setVendedores] = useState([]);
-    
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    // Hook para buscar dados das listas quando o componente carregar
+    // Busca dados na API ao carregar (apenas Categorias)
     useEffect(() => {
-        // Busca categorias
         CategoriaService.listarCategorias()
-            .then(response => setCategorias(response.data))
+            .then(response => setCategorias(Array.isArray(response.data) ? response.data : []))
             .catch(error => console.error("Erro ao buscar categorias:", error));
-
-        // Busca vendedores
-        UsuarioService.listarVendedores()
-            .then(response => setVendedores(response.data))
-            .catch(error => console.error("Erro ao buscar vendedores:", error));
     }, []);
 
+    // Lógica de handleChange
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        let value = e.target.value;
+        if (e.target.name === 'preco') {
+            value = value.replace(',', '.');
+        }
+        setFormData({ ...formData, [e.target.name]: value });
     };
 
+    // Lógica de handleSubmit 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
+        setLoading(true);
 
-        // Validação simples para os <select>
-        if (!formData.categoria || !formData.vendedor) {
-            setMessage('Por favor, selecione uma categoria e um vendedor.');
+        if (!formData.categoria) {
+            setMessage('Por favor, selecione uma categoria.');
+            setLoading(false);
             return;
         }
+        
+        const dataToSend = {
+            ...formData,
+            preco: parseFloat(String(formData.preco).replace(',', '.')), 
+            estoque: parseInt(formData.estoque, 10),
+        };
 
+        if (isNaN(dataToSend.preco) || isNaN(dataToSend.estoque)) {
+             setMessage('Erro: Preço ou Estoque inválidos. Por favor, insira apenas números.');
+             setLoading(false);
+             return;
+        }
+        
         try {
-            await ProdutoService.cadastrarProduto(formData);
-            setMessage('Produto cadastrado com sucesso!');
-            setFormData({ nome: '', descricao: '', preco: '', estoque: '', categoria: '', vendedor: '' });
+            await ProdutoService.cadastrarProduto(dataToSend);
+            setMessage('Produto cadastrado com sucesso! Redirecionando...');
+            setFormData({ nome: '', descricao: '', preco: '', estoque: '', categoria: '' });
+            setTimeout(() => navigate('/produtos'), 1500); 
+
         } catch (error) {
-            const errorMsg = error.response?.data?.mensagem || 'Erro ao cadastrar produto.';
-            setMessage(errorMsg);
+            const apiErrorMessage = error.response?.data?.mensagem || 
+                                    error.response?.data?.error || 
+                                    error.message;
+            
+            const customMsg = `Erro ao cadastrar produto. API respondeu: ${apiErrorMessage || 'Erro desconhecido.'}. Se o erro persistir, a API (Backend) está exigindo o campo 'vendedor', que foi removido a seu pedido.`;
+            
+            setMessage(customMsg);
+
+        } finally {
+            if (!message.startsWith('yes')) {
+                 setLoading(false);
+            }
         }
     };
+    
 
     return (
-        <div className="p-4 bg-gray-900 min-h-screen text-white">
-            <h1 className="text-2xl font-bold mb-4">Cadastro de Produto</h1>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md">
-                <input type="text" name="nome" placeholder="Nome do Produto" value={formData.nome} onChange={handleChange} className="p-2 bg-gray-700" required />
-                <textarea name="descricao" placeholder="Descrição" value={formData.descricao} onChange={handleChange} className="p-2 bg-gray-700" />
-                <input type="number" name="preco" placeholder="Preço" value={formData.preco} onChange={handleChange} className="p-2 bg-gray-700" required />
-                <input type="number" name="estoque" placeholder="Estoque" value={formData.estoque} onChange={handleChange} className="p-2 bg-gray-700" required />
+        <Container maxWidth="md" sx={{ py: 4 }}>
+            {/* Logo */}
+            <Box
+                component="img"
+                src="/tribo" 
+                alt="Logo da Loja"
+                sx={{
+                    width: 'auto',      
+                    maxHeight: '120px',
+                    mb: 3,             
+                    display: 'block',  
+                    mx: 'auto'         
+                }}
+            />
+            
+            <Paper elevation={10} sx={{ padding: { xs: 3, md: 5 } }}>
                 
-                {/* Dropdown para Categorias */}
-                <select name="categoria" value={formData.categoria} onChange={handleChange} className="p-2 bg-gray-700" required>
-                    <option value="">Selecione uma Categoria</option>
-                    {categorias.map(cat => (
-                        <option key={cat._id} value={cat._id}>{cat.nome}</option>
-                    ))}
-                </select>
+                <Typography 
+                    variant="h4" 
+                    component="h1" 
+                    align="center" 
+                    color="text.primary"
+                    sx={{ mb: 4 }} 
+                >
+                    Cadastrar Produto
+                </Typography>
+                
+                {message && (
+                    <Alert 
+                        severity={message.startsWith('✅') ? 'success' : 'error'} 
+                        sx={{ mb: 2 }}
+                    >
+                        {message}
+                    </Alert>
+                )}
 
-                {/* Dropdown para Vendedores */}
-                <select name="vendedor" value={formData.vendedor} onChange={handleChange} className="p-2 bg-gray-700" required>
-                    <option value="">Selecione um Vendedor</option>
-                    {vendedores.map(vend => (
-                        <option key={vend._id} value={vend._id}>{vend.nome}</option>
-                    ))}
-                </select>
+                <Box component="form" onSubmit={handleSubmit}>
+                    <Grid container spacing={4}>
+                        
+                        {/* --- COLUNA ESQUERDA (Informações) --- */}
+                        <Grid item xs={12} lg={6}>
+                            {}
+                            <Typography variant="h6" color="text.primary" sx={{ mb: 2 }}>
+                                Informações
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                <TextField 
+                                    label="Nome do Produto"
+                                    name="nome" 
+                                    value={formData.nome} 
+                                    onChange={handleChange} 
+                                    required 
+                                    fullWidth
+                                />
 
-                <button type="submit" className="p-2 bg-purple-600 hover:bg-purple-700 rounded">Cadastrar Produto</button>
-            </form>
-            {message && <p className="mt-4">{message}</p>}
-            <Link to="/produtos" className="text-purple-400 mt-4 inline-block">Ver Produtos</Link>
-        </div>
+                                <TextField
+                                    label="Descrição"
+                                    name="descricao" 
+                                    rows={3} 
+                                    multiline
+                                    value={formData.descricao} 
+                                    onChange={handleChange} 
+                                    fullWidth
+                                />
+
+                                <Grid container spacing={2}>
+                                    <Grid item xs={6}>
+                                        <TextField 
+                                            label="Preço (R$)"
+                                            name="preco" 
+                                            type="text" 
+                                            placeholder="59,90" 
+                                            value={formData.preco} 
+                                            onChange={handleChange} 
+                                            required 
+                                            fullWidth
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <TextField 
+                                            label="Estoque"
+                                            name="estoque" 
+                                            type="number"
+                                            placeholder="150" 
+                                            value={formData.estoque} 
+                                            onChange={handleChange} 
+                                            required 
+                                            fullWidth
+                                        />
+                                    </Grid>
+                                </Grid>
+
+                                <TextField 
+                                    label="Categoria"
+                                    name="categoria"
+                                    value={formData.categoria} 
+                                    onChange={handleChange} 
+                                    required
+                                    fullWidth
+                                    select
+                                >
+                                    <MenuItem value="">Selecione...</MenuItem>
+                                    {categorias.map(cat => (
+                                        <MenuItem key={cat._id} value={cat._id}>
+                                            {cat.nome}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                            </Box>
+                        </Grid>
+
+                        {}
+                        {}
+                        <Grid item xs={12} lg={6} sx={{ display: 'flex', flexDirection: 'column' }}>
+                            <Typography variant="h6" color="text.primary" sx={{ mb: 2 }}>
+                                Fotos (Mock)
+                            </Typography>
+                            
+                            {/* Placeholder de Imagem */}
+                            <Box sx={{
+                                flexGrow: 1, // Isso faz o Box preencher o espaço restante verticalmente
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minHeight: '250px', 
+                                border: '2px dashed',
+                                borderColor: 'rgba(255, 255, 255, 0.5)', 
+                                borderRadius: '30px', 
+                                backgroundColor: 'background.default', 
+                                cursor: 'pointer',
+                                p: 2, // Padding interno
+                            }}>
+                                <PhotoCameraIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 1 }} /> {/* Aumentei o ícone */}
+                                <Typography color="text.secondary" variant="body2">
+                                    Enviar imagem (Mock)
+                                </Typography>
+                            </Box>
+                        </Grid>
+                    </Grid>
+
+                    {}
+                    <Box sx={{
+                        mt: 4,
+                        pt: 2,
+                        borderTop: '1px solid rgba(255, 255, 255, 0.2)', 
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        gap: 2, 
+                    }}>
+                        <Button 
+                            variant="text" 
+                            color="secondary" 
+                            startIcon={<CancelIcon />}
+                            onClick={() => navigate('/produtos')} 
+                        >
+                            Cancelar
+                        </Button>
+                        
+                        <Button 
+                            type="submit" 
+                            variant="outlined" 
+                            color="primary"
+                            startIcon={!loading && <SendIcon />}
+                            disabled={loading}
+                            size="large"
+                        >
+                            {loading ? <CircularProgress size={24} color="inherit" /> : 'Salvar Produto'}
+                        </Button>
+                    </Box>
+                </Box>
+            </Paper>
+        </Container>
     );
 }
 
