@@ -2,7 +2,19 @@ import Usuario from '../models/Usuario.js';
 import bcrypt from 'bcryptjs';
 
 //Função utilitária para remover a senha do objeto de resposta
-
+const formatUsuarioResponse = (usuario) => {
+  // Converte o documento do Mongoose para um objeto JS puro
+  // 'toObject()' para garantir que estamos lidando com um objeto
+  const usuarioObj = usuario.toObject ? usuario.toObject() : { ...usuario };
+  
+  // Remove a propriedade 'senha' para nunca enviá-la ao frontend
+  delete usuarioObj.senha;
+  
+  // Remove propriedades internas do Mongoose 
+  delete usuarioObj.__v; 
+  
+  return usuarioObj;
+};
 
 //[POST] Endpoint de Cadastro de Cliente
 const cadastrarCliente = async (req, res) => {

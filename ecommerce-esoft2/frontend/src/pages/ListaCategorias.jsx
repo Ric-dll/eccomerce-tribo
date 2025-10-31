@@ -2,36 +2,113 @@ import React, { useState, useEffect } from 'react';
 import CategoriaService from '../services/CategoriaService';
 import { Link } from 'react-router-dom';
 
+// --- Importações do Material UI ---
+import {
+    Box,
+    Typography,
+    Button,
+    Paper,             // O container cinza escuro
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    CircularProgress,  // Spinner de carregamento
+    Container          // Para limitar a largura da tabela
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add'; // Ícone para o botão
+
 function ListaCategorias() {
     const [categorias, setCategorias] = useState([]);
+    const [loading, setLoading] = useState(true); 
+
     useEffect(() => {
         CategoriaService.listarCategorias()
-            .then(response => setCategorias(response.data))
-            .catch(error => console.error("Erro ao buscar categorias:", error));
+            .then(response => {
+                setCategorias(response.data);
+                setLoading(false); // <--- Desliga o loading
+            })
+            .catch(error => {
+                console.error("Erro ao buscar categorias:", error);
+                setLoading(false); // <--- Desliga o loading em caso de erro
+            });
     }, []);
 
+    // --- TELA DE CARREGAMENTO (MUI) ---
+    if (loading) {
+        return (
+            // Box para centralizar o spinner
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                // calc(100vh - 64px) -> 100% da altura menos a AppBar
+                minHeight: 'calc(100vh - 64px)', 
+                color: 'primary.main' // Branco
+            }}>
+                <CircularProgress color="inherit" />
+            </Box>
+        );
+    }
+
+    // --- TELA PRINCIPAL (MUI) ---
     return (
-        <div className="p-4 bg-gray-900 min-h-screen text-white">
-            <h1 className="text-2xl font-bold mb-4">Lista de Categorias</h1>
-            <Link to="/categorias/cadastrar" className="text-blue-400 mb-4 inline-block">Nova Categoria</Link>
-            <table className="w-full text-left">
-                <thead className="bg-gray-700">
-                    <tr>
-                        <th className="p-2">Nome</th>
-                        <th className="p-2">Categoria Pai</th>
-                    </tr>
-                </thead>
-                <tbody className="bg-gray-800">
-                    {categorias.map(cat => (
-                        <tr key={cat._id}>
-                            <td className="p-2">{cat.nome}</td>
-                            {/* O backend (Pessoa 1) popula o nome da categoriaPai */}
-                            <td className="p-2">{cat.categoriaPai ? cat.categoriaPai.nome : 'N/A (Raiz)'}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+        // Container para centralizar e limitar a largura da página
+        <Container maxWidth="lg" sx={{ py: 4 }}> {/* py: 4 = padding vertical */}
+            
+            {/* --- CABEÇALHO DA PÁGINA --- */}
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', // Título na esquerda, Botão na direita
+                alignItems: 'center', 
+                mb: 4 // Margem inferior
+            }}>
+                <Typography variant="h4" component="h1" color="text.primary">
+                    Lista de Categorias
+                </Typography>
+                
+                {/* Botão que leva para a página de cadastro */}
+                <Button 
+                    component={Link} 
+                    to="/categorias/cadastrar" // Link para o cadastro
+                    variant="contained" // Botão sólido
+                    color="primary"     // Cor branca (com texto preto)
+                    startIcon={<AddIcon />}
+                >
+                    Nova Categoria
+                </Button>
+            </Box>
+
+            {/* --- TABELA (MUI) --- */}
+            <TableContainer 
+                component={Paper}
+            >
+                <Table>
+                    {/* Cabeçalho da Tabela */}
+                    <TableHead>
+                        <TableRow>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Nome</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Categoria Pai</TableCell>
+                        </TableRow>
+                    </TableHead>
+
+                    {/* Corpo da Tabela */}
+                    <TableBody>
+                        {categorias.map(cat => (
+                            <TableRow 
+                                key={cat._id}
+                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            >
+                                <TableCell>{cat.nome}</TableCell>
+                                {}
+                                <TableCell>{cat.categoriaPai ? cat.categoriaPai.nome : 'N/A (Raiz)'}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Container>
     );
 }
 

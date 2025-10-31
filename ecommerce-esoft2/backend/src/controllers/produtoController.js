@@ -12,12 +12,15 @@ const cadastrarProduto = async (req, res) => {
         if(!categoriaExiste){
             return res.status(404).json({ mensagem: 'Categoria não encontrada.' });
         }
-
-        const vendedorExiste = await Usuario.findOne({_id: vendedor, tipoUsuario: 'Vendedor'});
-        if(!vendedorExiste){
-            return res.status(404).json({ mensagem: 'Vendedor não encontrado ou ID inválido.' });
+        if (vendedor) {
+            const vendedorExiste = await Usuario.findOne({_id: vendedor, tipoUsuario: 'Vendedor'});
+            if(!vendedorExiste){
+                return res.status(404).json({ mensagem: 'Vendedor não encontrado ou ID inválido.' });
+            }
         }
-
+        
+        // O valor de 'vendedor' será undefined (se não foi enviado) ou o ID validado.
+        // O Mongoose salva como null (ou não salva) porque o 'required: false' foi feito no modelo.
         const novoProduto = await Produto.create({ nome, descricao, preco, estoque, categoria, vendedor, imagens, ativo: true });
 
         res.status(201).json(novoProduto);

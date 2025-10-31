@@ -2,49 +2,149 @@ import React, { useState, useEffect } from 'react';
 import ProdutoService from '../services/ProdutoService';
 import { Link } from 'react-router-dom';
 
+// --- Importações do Material UI ---
+import {
+    Box,
+    Typography,
+    Button,
+    Paper,             // O container cinza escuro
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    CircularProgress,  // Spinner de carregamento
+    Container,         // Para limitar a largura da tabela
+    Alert,             // Para exibir a mensagem de erro
+    AlertTitle         // Título para o Alerta
+} from '@mui/material';
+// --- Ícones ---
+import AddIcon from '@mui/icons-material/Add'; 
+import EditIcon from '@mui/icons-material/Edit'; // Ícone para o botão "Editar"
+
 function ListaProdutos() {
     const [produtos, setProdutos] = useState([]);
     const [loading, setLoading] = useState(true);
-
+    const [error, setError] = useState(null);
+    
+    // Lógica de Busca (Preservada)
     useEffect(() => {
         ProdutoService.listarProdutos()
             .then(response => {
-                setProdutos(response.data);
-                setLoading(false);
+                setProdutos(Array.isArray(response.data) ? response.data : []);
             })
-            .catch(error => console.error("Erro ao buscar produtos:", error));
+            .catch(err => {
+                console.error("Erro ao buscar produtos:", err);
+                setError("Erro ao carregar a lista de produtos.");
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, []);
-
-    if (loading) return <p className="text-white">Carregando...</p>;
+    
+    // --- Renderização de Estados ---
+    
+    if (loading) return (
+        <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            minHeight: 'calc(100vh - 64px)', 
+            color: 'primary.main' 
+        }}>
+            <CircularProgress color="inherit" />
+        </Box>
+    );
+    
+    if (error) return (
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+            <Alert severity="error">
+                <AlertTitle>Erro de Carregamento</AlertTitle>
+                {error}
+            </Alert>
+        </Container>
+    );
+    
+    // --- Renderização da Tabela ---
 
     return (
-        <div className="p-4 bg-gray-900 min-h-screen text-white">
-            <h1 className="text-2xl font-bold mb-4">Lista de Produtos</h1>
-            <Link to="/produtos/cadastrar" className="text-purple-400 mb-4 inline-block">Novo Produto</Link>
-            <table className="w-full text-left">
-                <thead className="bg-gray-700">
-                    <tr>
-                        <th className="p-2">Nome</th>
-                        <th className="p-2">Preço</th>
-                        <th className="p-2">Estoque</th>
-                        <th className="p-2">Categoria</th>
-                        <th className="p-2">Vendedor</th>
-                    </tr>
-                </thead>
-                <tbody className="bg-gray-800">
-                    {produtos.map(produto => (
-                        <tr key={produto._id}>
-                            <td className="p-2">{produto.nome}</td>
-                            <td className="p-2">R$ {produto.preco.toFixed(2)}</td>
-                            <td className="p-2">{produto.estoque}</td>
-                            {/* O backend (Pessoa 1) popula 'categoria' e 'vendedor' */}
-                            <td className="p-2">{produto.categoria ? produto.categoria.nome : 'N/A'}</td>
-                            <td className="p-2">{produto.vendedor ? produto.vendedor.nome : 'N/A'}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+            {/* --- CABEÇALHO DA PÁGINA --- */}
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                mb: 4 
+            }}>
+                <Typography variant="h4" component="h1" color="text.primary">
+                    Lista de Produtos ({produtos.length})
+                </Typography>
+                <Button 
+                    component={Link} 
+                    to="/produtos/cadastrar" 
+                    variant="contained" // Botão sólido (branco com texto preto)
+                    color="primary"     
+                    startIcon={<AddIcon />}
+                >
+                    + Novo Produto
+                </Button>
+            </Box>
+            
+            {/* --- TABELA (MUI) --- */}
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Nome</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Preço</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Estoque</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Categoria</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Vendedor</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }} align="right">Ações</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {produtos.map(produto => (
+                            <TableRow 
+                                key={produto._id}
+                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            >
+                                <TableCell sx={{ fontWeight: 500 }}>{produto.nome}</TableCell>
+                                <TableCell>
+                                    R$ {Number(produto.preco).toFixed(2).replace('.', ',')}
+                                </TableCell>
+                                <TableCell>{produto.estoque}</TableCell>
+                                <TableCell>
+                                    {produto.categoria ? produto.categoria.nome : 'N/A'}
+                                </TableCell>
+                                <TableCell>
+                                    {produto.vendedor ? produto.vendedor.nome || 'N/A' : 'N/A'}
+                                </TableCell>
+                                <TableCell align="right">
+                                    <Button 
+                                        component={Link} 
+                                        to={`/produtos/editar/${produto._id}`} 
+                                        variant="text" // Botão sutil
+                                        color="primary" // Cor branca (do tema)
+                                        startIcon={<EditIcon />}
+                                    >
+                                        Editar
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            
+            {/* Mensagem de Tabela Vazia */}
+            {produtos.length === 0 && (
+                 <Typography color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+                     Nenhum produto cadastrado no momento.
+                 </Typography>
+            )}
+        </Container>
     );
 }
 
