@@ -30,7 +30,7 @@ function ListaProdutos() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
-    // Lógica de Busca (Nenhuma mudança necessária)
+    // Lógica de Busca 
     useEffect(() => {
         ProdutoService.listarProdutos()
             .then(response => {
@@ -85,7 +85,7 @@ function ListaProdutos() {
                 <Button 
                     component={Link} 
                     to="/produtos/cadastrar" 
-                    variant="contained" 
+                    variant="contained" // Botão sólido 
                     color="primary"     
                     startIcon={<AddIcon />}
                 >
