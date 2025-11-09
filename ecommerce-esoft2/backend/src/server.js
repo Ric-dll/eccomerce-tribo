@@ -6,7 +6,7 @@ import dotenv from 'dotenv'; // Pacote para carregar variáveis de ambiente
 // Carrega as variáveis de ambiente do .env imediatamente
 dotenv.config(); 
 
-import connectDB from './config/db.js'; // Conexão DB
+import { connectDB } from './config/db.js';// Conexão DB
 
 // Importa as Rotas
 import usuarioRoutes from './routes/usuarioRoutes.js';
@@ -46,5 +46,5 @@ app.use('/api/produtos', produtoRoutes);
 
 // 5. INICIALIZAÇÃO DO SERVIDOR
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+    console.log(`Servidor rodando em http://localhost:${PORT}`);
 });

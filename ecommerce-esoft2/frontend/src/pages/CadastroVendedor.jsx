@@ -1,3 +1,5 @@
+// frontend/src/pages/CadastroVendedor.jsx (CORRIGIDO E COMPLETO)
+
 import React, { useState } from 'react';
 import UsuarioService from '../services/UsuarioService';
 import { Link } from 'react-router-dom';
@@ -15,18 +17,19 @@ import {
 import SendIcon from '@mui/icons-material/Send'; // Ícone do botão
 
 function CadastroVendedor() {
-    // Estado do formulário para Vendedor
+    // 1. (MUDANÇA) Estado do formulário usa os nomes da API SQL
     const [formData, setFormData] = useState({
-        nome: '',
-        email: '',
-        senha: '',
-        telefone: '',
-        areaResponsavel: '',
+        Nome: '',
+        Email: '',
+        Senha: '',
+        Telefone: '',
+        AreaResponsavel: '', // Antes era 'areaResponsavel'
     });
     
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // O 'handleChange' genérico continua funcionando perfeitamente
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -37,11 +40,14 @@ function CadastroVendedor() {
         setLoading(true);
 
         try {
+            // O 'formData' já está no formato correto que o backend espera
             await UsuarioService.cadastrarVendedor(formData);
             
-            // Caminho feliz (o backend retornou 201)
-            setMessage('Vendedor cadastrado com sucesso!');
-            setFormData({ nome: '', email: '', senha: '', telefone: '', areaResponsavel: '' });
+            // 2. (MUDANÇA) Mensagem de sucesso padronizada
+            setMessage('✅ Vendedor cadastrado com sucesso!');
+            
+            // 3. (MUDANÇA) Resetar o formulário com os nomes corretos
+            setFormData({ Nome: '', Email: '', Senha: '', Telefone: '', AreaResponsavel: '' });
 
         } catch (error) {
             // Caminho de erro (o backend retornou 400, 500, etc.)
@@ -109,8 +115,9 @@ function CadastroVendedor() {
                     
                     {/* Mensagem de Alerta (Sucesso/Erro) */}
                     {message && (
+                        // 4. (MUDANÇA) Lógica do Alert corrigida
                         <Alert 
-                            severity={message.startsWith('yes') ? 'success' : 'error'} 
+                            severity={message.startsWith('✅') ? 'success' : 'error'} 
                             sx={{ mb: 2 }} 
                         >
                             {message}
@@ -123,44 +130,45 @@ function CadastroVendedor() {
                         onSubmit={handleSubmit} 
                         sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
                     >
+                        {/* 5. (MUDANÇA) 'name' e 'value' dos TextFields atualizados */}
                         <TextField 
                             label="Nome" 
-                            name="nome" 
-                            value={formData.nome} 
+                            name="Nome" 
+                            value={formData.Nome} 
                             onChange={handleChange} 
                             required 
                             fullWidth
                         />
                         <TextField 
                             label="Email" 
-                            name="email" 
+                            name="Email" 
                             type="email" 
-                            value={formData.email} 
+                            value={formData.Email} 
                             onChange={handleChange} 
                             required 
                             fullWidth 
                         />
                         <TextField 
                             label="Senha" 
-                            name="senha" 
+                            name="Senha" 
                             type="password" 
-                            value={formData.senha} 
+                            value={formData.Senha} 
                             onChange={handleChange} 
                             required 
                             fullWidth 
                         />
                         <TextField 
                             label="Telefone" 
-                            name="telefone" 
+                            name="Telefone" 
                             type="tel" 
-                            value={formData.telefone} 
+                            value={formData.Telefone} 
                             onChange={handleChange} 
                             fullWidth 
                         />
                         <TextField 
                             label="Área Responsável" 
-                            name="areaResponsavel" 
-                            value={formData.areaResponsavel} 
+                            name="AreaResponsavel" 
+                            value={formData.AreaResponsavel} 
                             onChange={handleChange} 
                             fullWidth 
                         />

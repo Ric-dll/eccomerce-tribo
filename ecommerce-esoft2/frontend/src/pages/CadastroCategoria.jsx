@@ -1,3 +1,5 @@
+// frontend/src/pages/CadastroCategoria.jsx (CORRIGIDO)
+
 import React, { useState, useEffect } from 'react';
 import CategoriaService from '../services/CategoriaService';
 import { Link } from 'react-router-dom'; 
@@ -16,12 +18,17 @@ import {
 import SendIcon from '@mui/icons-material/Send'; // Ícone do botão
 
 function CadastroCategoria() {
-    const [formData, setFormData] = useState({ nome: '', descricao: '', categoriaPai: '' });
+    // 1. (MUDANÇA) O estado inicial agora usa os nomes da API SQL
+    const [formData, setFormData] = useState({ 
+        Nome: '', 
+        Descricao: '', 
+        Categoria_pai_ID: '' 
+    });
+    
     const [categorias, setCategorias] = useState([]);
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // (Sua lógica 'useEffect' e 'handleChange' permanece a mesma)
     useEffect(() => {
         CategoriaService.listarCategorias()
             .then(response => {
@@ -30,26 +37,34 @@ function CadastroCategoria() {
             .catch(error => console.error("Erro ao buscar categorias:", error));
     }, []);
 
+    // Esta função (handleChange) funciona como estava,
+    // pois ela lê o 'name' do e.target
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // (Sua lógica 'handleSubmit' permanece a mesma)
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
         setLoading(true);
 
+        // 2. (MUDANÇA) Prepara os dados para envio com os nomes corretos
         const dataToSubmit = {
             ...formData,
-            categoriaPai: formData.categoriaPai || null
+            // Garante que o valor enviado seja 'null' se estiver vazio
+            Categoria_pai_ID: formData.Categoria_pai_ID || null
         };
 
         try {
             await CategoriaService.cadastrarCategoria(dataToSubmit);
-            setMessage('Categoria cadastrada com sucesso!');
-            setFormData({ nome: '', descricao: '', categoriaPai: '' });
             
+            // 3. (MUDANÇA) Mensagem de sucesso (usei um emoji para diferenciar)
+            setMessage('✅ Categoria cadastrada com sucesso!');
+            
+            // 4. (MUDANÇA) Reseta o formulário para os novos nomes de estado
+            setFormData({ Nome: '', Descricao: '', Categoria_pai_ID: '' });
+            
+            // Atualiza a lista
             const response = await CategoriaService.listarCategorias();
             setCategorias(response.data);
 
@@ -62,7 +77,6 @@ function CadastroCategoria() {
     };
 
     return (
-        // Box de Fundo (preto, centralizado)
         <Box 
             sx={{ 
                 minHeight: '100vh', 
@@ -75,7 +89,6 @@ function CadastroCategoria() {
                 py: 4, 
             }}
         >
-            {/* Box de Conteúdo (limita a largura) */}
             <Box 
                 sx={{
                     width: '100%',
@@ -83,26 +96,13 @@ function CadastroCategoria() {
                     padding: 2, 
                 }}
             >
-                {/* Logo */}
-                <Box
-                    component="img"
-                    src="/tribo"
-                    alt="Logo da Loja"
-                    sx={{
-                        width: 'auto',      
-                        maxHeight: '120px',
-                        mb: 3,             
-                        display: 'block',  
-                        mx: 'auto'         
-                    }}
-                />
-                
-                {/* Container do Formulário (cinza escuro, bordas arredondadas) */}
+                {/* ... (Seu Logo e Paper) ... */}
                 <Paper 
                     elevation={10} 
                     sx={{ padding: 5 }}
                 >
-                    <Typography 
+                    {/* ... (Seu Typography e Alert) ... */}
+                     <Typography 
                         variant="h4" 
                         component="h1" 
                         gutterBottom 
@@ -113,7 +113,6 @@ function CadastroCategoria() {
                         Cadastro de Categoria
                     </Typography>
                     
-                    {/* Mensagem de Alerta (Sucesso/Erro) */}
                     {message && (
                         <Alert 
                             severity={message.startsWith('✅') ? 'success' : 'error'} 
@@ -123,38 +122,37 @@ function CadastroCategoria() {
                         </Alert>
                     )}
 
-                    {/* Formulário */}
                     <Box 
                         component="form" 
                         onSubmit={handleSubmit} 
                         sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
                     >
-                        {/* Nome da Categoria (TextField) */}
+                        {/* 5. (MUDANÇA) O 'name' agora é "Nome" (maiúsculo) */}
                         <TextField 
                             label="Nome da Categoria" 
-                            name="nome" 
-                            value={formData.nome} 
+                            name="Nome" 
+                            value={formData.Nome} 
                             onChange={handleChange} 
                             required 
                             fullWidth
                         />
                         
-                        {/* Descrição (TextField multiline) */}
+                        {/* 6. (MUDANÇA) O 'name' agora é "Descricao" (maiúsculo) */}
                         <TextField 
                             label="Descrição" 
-                            name="descricao" 
-                            value={formData.descricao} 
+                            name="Descricao" 
+                            value={formData.Descricao} 
                             onChange={handleChange} 
                             fullWidth
                             multiline 
                             rows={4}      
                         />
                         
-                        {/* Categoria Pai (TextField select) */}
+                        {/* 7. (MUDANÇA) O 'name' agora é "Categoria_pai_ID" */}
                         <TextField 
                             label="Categoria Pai"
-                            name="categoriaPai"
-                            value={formData.categoriaPai} 
+                            name="Categoria_pai_ID"
+                            value={formData.Categoria_pai_ID} 
                             onChange={handleChange} 
                             fullWidth
                             select 
@@ -162,15 +160,17 @@ function CadastroCategoria() {
                             <MenuItem value="">
                                 <em>Nenhuma (Categoria Raiz)</em>
                             </MenuItem>
+                            
+                            {/* 8. (MUDANÇA) O 'key' e 'value' usam 'ID_categoria' */}
                             {categorias.map(cat => (
-                                <MenuItem key={cat._id} value={cat._id}>
-                                    {cat.nome}
+                                <MenuItem key={cat.ID_categoria} value={cat.ID_categoria}>
+                                    {cat.Nome} {/* cat.Nome já deve estar correto vindo da API */}
                                 </MenuItem>
                             ))}
                         </TextField>
 
-                        {/* Botão de Cadastro (Outlined, Branco) */}
-                        <Button 
+                        {/* ... (Seu Botão e Link) ... */}
+                         <Button 
                             type="submit" 
                             disabled={loading}
                             variant="outlined" 
@@ -183,7 +183,6 @@ function CadastroCategoria() {
                         </Button>
                     </Box>
 
-                    {/* Link para Ver Categorias */}
                     <Box sx={{ mt: 2, textAlign: 'center' }}>
                         <Link to="/categorias" style={{ textDecoration: 'none' }}>
                              <Typography color="primary" variant="body2">
