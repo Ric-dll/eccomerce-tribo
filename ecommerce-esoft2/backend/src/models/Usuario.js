@@ -1,31 +1,50 @@
-//Implementa Usuario, Cliente e Vendedor em um único Schema, usando o campo tipoUsuario como discriminador
+// backend/src/models/Usuario.js
+import { Model, DataTypes } from 'sequelize';
 
-import mongoose, { mongo } from 'mongoose';
-
-const usuarioEsquema = new mongoose.Schema({
-    nome: {type: String, required:  [true, 'O nome é obrigatório'], trim: true},
-    email: {type: String, required: [true, 'O email é obrigatório'], unique: true, lowercase: true},
-    senha: {type: String, required: [true, 'A Senha é obrigatória']}, //Onde o hash será armazenado
-    telefone: {type: String, trim: true},
-
-    tipoUsuario: {
-        type:String,
-        enum: ['Cliente', 'Vendedor', 'Administrador', 'ResponsavelLogistica'],
-        default: 'Cliente',
-        required: true
-    },
-
-    ativo: {type: Boolean, default: true},
-
-    //Campos específicos de Cliente
-    cpf: {type: String, Unique: true, sparce: true},
-    dataNasc: {type: Date},
-
-    //Campos específicos de Vendedor
-    areaResponsavel: {type: String},
-    
-}, {timestamps: true,}); //createdAt e updatedAt
-
-const Usuario = mongoose.model('Usuario', usuarioEsquema);
-
+class Usuario extends Model {
+    static init(sequelize) {
+        super.init({
+            ID_usuario: {
+                type: DataTypes.INTEGER,
+                primaryKey: true,
+                autoIncrement: true
+            },
+            Nome: {
+                type: DataTypes.STRING(100),
+                allowNull: false
+            },
+            Email: {
+                type: DataTypes.STRING(100),
+                allowNull: false,
+                unique: true,
+                validate: { isEmail: true }
+            },
+            Senha_hash: { // Note o nome exato da coluna
+                type: DataTypes.STRING(255),
+                allowNull: false,
+                field: 'Senha_hash' // Garante o nome do campo no BD
+            },
+            Telefone: {
+                type: DataTypes.STRING(20)
+            },
+            Data_cadastro: {
+                type: DataTypes.DATE,
+                allowNull: false,
+                defaultValue: DataTypes.NOW // Preenche automaticamente
+            },
+            Ativo: {
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+                defaultValue: true
+            }
+            // TipoUsuario_ID (A chave estrangeira) é adicionada automaticamente
+            // pela associação no db.js
+        }, {
+            sequelize,
+            modelName: 'Usuario',
+            tableName: 'Usuario'
+        });
+        return this;
+    }
+}
 export default Usuario;

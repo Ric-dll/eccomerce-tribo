@@ -1,7 +1,8 @@
+// frontend/src/pages/CadastroCliente.jsx (CORRIGIDO)
+
 import React, { useState } from 'react';
 import UsuarioService from '../services/UsuarioService';
 import { Link, useNavigate } from 'react-router-dom';
-
 
 import {
     Box,
@@ -17,8 +18,10 @@ import SendIcon from '@mui/icons-material/Send';
 function CadastroCliente() {
 
     const navigate = useNavigate();
+    
+    // 1. (MUDANÇA) O estado usa os nomes da API SQL
     const [formData, setFormData] = useState({
-        nome: '', email: '', senha: '', cpf: '', telefone: '', dataNasc: '',
+        Nome: '', Email: '', Senha: '', CPF: '', Telefone: '', DataNasc: '',
     });
     
     const [message, setMessage] = useState('');
@@ -35,10 +38,15 @@ function CadastroCliente() {
         setLoading(true);
 
         try {
+            // 'formData' já está no formato correto que o backend (corrigido) espera
             await UsuarioService.cadastrarCliente(formData);
             
-            setMessage('Cliente cadastrado com sucesso!');
-            setFormData({ nome: '', email: '', senha: '', cpf: '', telefone: '', dataNasc: '' });
+            // 2. (MUDANÇA) Mensagem de sucesso para o Alert
+            setMessage('✅ Cliente cadastrado com sucesso!');
+            
+            // 3. (MUDANÇA) Resetar o formulário com os nomes corretos
+            setFormData({ Nome: '', Email: '', Senha: '', CPF: '', Telefone: '', DataNasc: '' });
+            
             setTimeout(() => navigate('/clientes'), 1500);
 
         } catch (error) {
@@ -56,14 +64,18 @@ function CadastroCliente() {
         <Box 
             sx={{ 
                 minHeight: '100vh', 
-                width: '100%',
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center',
+                width: '100%', // Garante que o 'pai' ocupe a largura toda
+                
+                // --- A MÁGICA ESTÁ AQUI ---
+                display: 'flex',
+                justifyContent: 'center', // Centraliza horizontalmente
+                alignItems: 'center',     // Centraliza verticalmente
+                // -------------------------
+
+                // Bônus: Pega a cor de fundo do seu tema e adiciona um padding
                 backgroundColor: 'background.default', 
                 color: 'text.primary', 
-                // Adiciona padding vertical à página inteira para garantir espaço
-                py: 4, 
+                py: 4, // Padding vertical (para rolagem em telas pequenas)
             }}
         >
             <Box 
@@ -73,17 +85,18 @@ function CadastroCliente() {
                     padding: 2, 
                 }}
             >
-                {}
+                
+                {/* Logo (Não esqueça de adicionar o seu componente de Logo aqui!) */}
                 <Box
                     component="img"
-                    src="/tribo" // <-- NOME DO ARQUIVO DA LOGO
+                    src="/tribo" // <-- NOME DO ARQUIVO DA LOGO (como nos seus outros arquivos)
                     alt="Logo da Loja"
                     sx={{
                         width: 'auto',      
-                        maxHeight: '120px', // Altura máxima da logo
-                        mb: 3,             // Margem inferior (separa do Paper)
-                        display: 'block',  // Para centralizar com margin
-                        mx: 'auto'         // Centraliza horizontalmente
+                        maxHeight: '120px', 
+                        mb: 3,             
+                        display: 'block',  
+                        mx: 'auto'         
                     }}
                 />
                 
@@ -95,11 +108,10 @@ function CadastroCliente() {
                 >
                     <Typography 
                         variant="h4" 
-                        component="h1" 
-                        gutterBottom 
+                        component="h1" // <-- Adicionado para semântica
+                        gutterBottom     // <-- Adicionado para espaçamento
                         align="center" 
                         color="text.primary"
-                        
                         sx={{ mb: 4 }} 
                     >
                         Cadastro de Cliente
@@ -107,8 +119,8 @@ function CadastroCliente() {
                     
                     {message && (
                         <Alert 
-                            severity={message.startsWith('Yes') ? 'success' : 'error'} 
-                            sx={{ mb: 2 }} 
+                            severity={message.startsWith('✅') ? 'success' : 'error'} 
+                            sx={{ mb: 2 }}
                         >
                             {message}
                         </Alert>
@@ -119,53 +131,53 @@ function CadastroCliente() {
                         onSubmit={handleSubmit} 
                         sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
                     >
-                        {}
+                        
                         <TextField 
                             label="Nome" 
-                            name="nome" 
-                            value={formData.nome} 
+                            name="Nome" 
+                            value={formData.Nome} 
                             onChange={handleChange} 
                             required 
                             fullWidth
                         />
                         <TextField 
                             label="Email" 
-                            name="email" 
+                            name="Email" 
                             type="email" 
-                            value={formData.email} 
+                            value={formData.Email} 
                             onChange={handleChange} 
                             required 
                             fullWidth 
                         />
                         <TextField 
                             label="Senha" 
-                            name="senha" 
+                            name="Senha" 
                             type="password" 
-                            value={formData.senha} 
+                            value={formData.Senha} 
                             onChange={handleChange} 
                             required 
                             fullWidth 
                         />
                         <TextField 
                             label="CPF" 
-                            name="cpf" 
-                            value={formData.cpf} 
+                            name="CPF" 
+                            value={formData.CPF} 
                             onChange={handleChange} 
                             fullWidth 
                         />
                         <TextField 
                             label="Telefone" 
-                            name="telefone" 
+                            name="Telefone" 
                             type="tel" 
-                            value={formData.telefone} 
+                            value={formData.Telefone} 
                             onChange={handleChange} 
                             fullWidth 
                         />
                         <TextField 
                             label="Data de Nascimento" 
-                            name="dataNasc" 
+                            name="DataNasc" 
                             type="date" 
-                            value={formData.dataNasc} 
+                            value={formData.DataNasc} 
                             onChange={handleChange} 
                             fullWidth 
                             InputLabelProps={{ shrink: true }}

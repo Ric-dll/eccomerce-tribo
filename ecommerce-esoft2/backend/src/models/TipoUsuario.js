@@ -1,10 +1,10 @@
-// backend/src/models/Categoria.js
+// backend/src/models/TipoUsuario.js
 import { Model, DataTypes } from 'sequelize';
 
-class Categoria extends Model {
+class TipoUsuario extends Model {
     static init(sequelize) {
         super.init({
-            ID_categoria: {
+            ID_Tipo: {
                 type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true
@@ -13,17 +13,13 @@ class Categoria extends Model {
                 type: DataTypes.STRING(50),
                 allowNull: false,
                 unique: true
-            },
-            Descricao: {
-                type: DataTypes.TEXT
             }
-            // Categoria_pai_ID (FK) é adicionada pela associação no db.js
         }, {
             sequelize,
-            modelName: 'Categoria',
-            tableName: 'Categoria'
+            modelName: 'TipoUsuario',
+            tableName: 'TipoUsuario' // Nome exato da tabela
         });
         return this;
     }
 }
-export default Categoria;
+export default TipoUsuario;

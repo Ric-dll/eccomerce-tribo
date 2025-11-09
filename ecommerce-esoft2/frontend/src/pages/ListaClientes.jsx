@@ -1,3 +1,5 @@
+// frontend/src/pages/ListaClientes.jsx (CORRIGIDO E COMPLETO)
+
 import React, { useState, useEffect } from 'react';
 import UsuarioService from '../services/UsuarioService';
 import { Link } from 'react-router-dom';
@@ -7,15 +9,15 @@ import {
     Box,
     Typography,
     Button,
-    Paper,             // O container cinza escuro
+    Paper,             
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    CircularProgress,  // Spinner de carregamento
-    Container          // Para limitar a largura da tabela 
+    CircularProgress,  
+    Container          
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add'; // Ícone para o botão
 
@@ -23,53 +25,53 @@ function ListaClientes() {
     const [clientes, setClientes] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Nenhuma mudança necessária no useEffect
     useEffect(() => {
         UsuarioService.listarClientes()
             .then(response => {
                 setClientes(response.data);
                 setLoading(false);
             })
-            .catch(error => console.error("Erro ao buscar clientes:", error));
+            .catch(error => {
+                console.error("Erro ao buscar clientes:", error);
+                setLoading(false); // <--- Adicionado para parar o loading em caso de erro
+            });
     }, []);
 
-    // --- TELA DE CARREGAMENTO (MUI) ---
+    // Nenhuma mudança necessária na tela de carregamento
     if (loading) {
         return (
-            // Box para centralizar o spinner
             <Box sx={{ 
                 display: 'flex', 
                 justifyContent: 'center', 
                 alignItems: 'center', 
-                // calc(100vh - 64px) -> 100% da altura menos a AppBar
                 minHeight: 'calc(100vh - 64px)', 
-                color: 'primary.main' // Branco
+                color: 'primary.main' 
             }}>
                 <CircularProgress color="inherit" />
             </Box>
         );
     }
 
-    // --- TELA PRINCIPAL (MUI) ---
+    // Nenhuma mudança necessária no Container ou Cabeçalho
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}> {/* py: 4 = padding vertical */}
+        <Container maxWidth="lg" sx={{ py: 4 }}> 
             
-            {/* --- CABEÇALHO DA PÁGINA --- */}
             <Box sx={{ 
                 display: 'flex', 
-                justifyContent: 'space-between', // Título na esquerda, Botão na direita
+                justifyContent: 'space-between', 
                 alignItems: 'center', 
-                mb: 4 // Margem inferior
+                mb: 4 
             }}>
                 <Typography variant="h4" component="h1" color="text.primary">
                     Lista de Clientes
                 </Typography>
                 
-                {/* Botão que leva para a página de cadastro (que é a raiz '/') */}
                 <Button 
                     component={Link} 
-                    to="/" 
-                    variant="contained" // Botão sólido
-                    color="primary"     // Cor branca (com texto preto, do nosso tema)
+                    to="/clientes/cadastrar" // Ajustei o link para a rota de cadastro correta
+                    variant="contained" 
+                    color="primary"     
                     startIcon={<AddIcon />}
                 >
                     Novo Cliente
@@ -81,7 +83,7 @@ function ListaClientes() {
                 component={Paper}
             >
                 <Table>
-                    {/* Cabeçalho da Tabela */}
+                    {/* Cabeçalho da Tabela (Nenhuma mudança) */}
                     <TableHead>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 'bold' }}>Nome</TableCell>
@@ -90,17 +92,22 @@ function ListaClientes() {
                         </TableRow>
                     </TableHead>
 
-                    {/* Corpo da Tabela */}
+                    {/* Corpo da Tabela (AQUI ESTÃO AS MUDANÇAS) */}
                     <TableBody>
                         {clientes.map(cliente => (
                             <TableRow 
-                                key={cliente._id}
-                                // Remove a borda da última linha (detalhe de design)
+                                // 1. (MUDANÇA) 'key' usa a nova PK do SQL
+                                key={cliente.ID_usuario}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
-                                <TableCell>{cliente.nome}</TableCell>
-                                <TableCell>{cliente.email}</TableCell>
-                                <TableCell>{cliente.telefone || 'N/A'}</TableCell>
+                                {/* 2. (MUDANÇA) 'nome' agora é 'Nome' */}
+                                <TableCell>{cliente.Nome}</TableCell>
+                                
+                                {/* 3. (MUDANÇA) 'email' agora é 'Email' */}
+                                <TableCell>{cliente.Email}</TableCell>
+                                
+                                {/* 4. (MUDANÇA) 'telefone' agora é 'Telefone' */}
+                                <TableCell>{cliente.Telefone || 'N/A'}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

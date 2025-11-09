@@ -1,3 +1,5 @@
+// frontend/src/pages/ListaCategorias.jsx (CORRIGIDO E COMPLETO)
+
 import React, { useState, useEffect } from 'react';
 import CategoriaService from '../services/CategoriaService';
 import { Link } from 'react-router-dom';
@@ -7,15 +9,15 @@ import {
     Box,
     Typography,
     Button,
-    Paper,             // O container cinza escuro
+    Paper,             
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    CircularProgress,  // Spinner de carregamento
-    Container          // Para limitar a largura da tabela
+    CircularProgress,  
+    Container          
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add'; // Ícone para o botão
 
@@ -23,57 +25,53 @@ function ListaCategorias() {
     const [categorias, setCategorias] = useState([]);
     const [loading, setLoading] = useState(true); 
 
+    // Nenhuma mudança necessária no useEffect
     useEffect(() => {
         CategoriaService.listarCategorias()
             .then(response => {
                 setCategorias(response.data);
-                setLoading(false); // <--- Desliga o loading
+                setLoading(false); 
             })
             .catch(error => {
                 console.error("Erro ao buscar categorias:", error);
-                setLoading(false); // <--- Desliga o loading em caso de erro
+                setLoading(false); 
             });
     }, []);
 
-    // --- TELA DE CARREGAMENTO (MUI) ---
+    // Nenhuma mudança necessária na tela de carregamento
     if (loading) {
         return (
-            // Box para centralizar o spinner
             <Box sx={{ 
                 display: 'flex', 
                 justifyContent: 'center', 
                 alignItems: 'center', 
-                // calc(100vh - 64px) -> 100% da altura menos a AppBar
                 minHeight: 'calc(100vh - 64px)', 
-                color: 'primary.main' // Branco
+                color: 'primary.main' 
             }}>
                 <CircularProgress color="inherit" />
             </Box>
         );
     }
 
-    // --- TELA PRINCIPAL (MUI) ---
+    // Nenhuma mudança necessária no Container ou no Cabeçalho
     return (
-        // Container para centralizar e limitar a largura da página
-        <Container maxWidth="lg" sx={{ py: 4 }}> {/* py: 4 = padding vertical */}
+        <Container maxWidth="lg" sx={{ py: 4 }}> 
             
-            {/* --- CABEÇALHO DA PÁGINA --- */}
             <Box sx={{ 
                 display: 'flex', 
-                justifyContent: 'space-between', // Título na esquerda, Botão na direita
+                justifyContent: 'space-between', 
                 alignItems: 'center', 
-                mb: 4 // Margem inferior
+                mb: 4 
             }}>
                 <Typography variant="h4" component="h1" color="text.primary">
                     Lista de Categorias
                 </Typography>
                 
-                {/* Botão que leva para a página de cadastro */}
                 <Button 
                     component={Link} 
-                    to="/categorias/cadastrar" // Link para o cadastro
-                    variant="contained" // Botão sólido
-                    color="primary"     // Cor branca (com texto preto)
+                    to="/categorias/cadastrar" 
+                    variant="contained" 
+                    color="primary"     
                     startIcon={<AddIcon />}
                 >
                     Nova Categoria
@@ -85,7 +83,7 @@ function ListaCategorias() {
                 component={Paper}
             >
                 <Table>
-                    {/* Cabeçalho da Tabela */}
+                    {/* Cabeçalho da Tabela (Nenhuma mudança) */}
                     <TableHead>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 'bold' }}>Nome</TableCell>
@@ -93,16 +91,19 @@ function ListaCategorias() {
                         </TableRow>
                     </TableHead>
 
-                    {/* Corpo da Tabela */}
+                    {/* Corpo da Tabela (AQUI ESTÃO AS MUDANÇAS) */}
                     <TableBody>
                         {categorias.map(cat => (
                             <TableRow 
-                                key={cat._id}
+                                // 1. (MUDANÇA) 'key' usa a nova PK do SQL
+                                key={cat.ID_categoria}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
-                                <TableCell>{cat.nome}</TableCell>
-                                {}
-                                <TableCell>{cat.categoriaPai ? cat.categoriaPai.nome : 'N/A (Raiz)'}</TableCell>
+                                {/* 2. (MUDANÇA) Campo 'nome' agora é 'Nome' */}
+                                <TableCell>{cat.Nome}</TableCell>
+                                
+                                {/* 3. (MUDANÇA) 'cat.categoriaPai.nome' agora é 'cat.categoriaPai.Nome' */}
+                                <TableCell>{cat.categoriaPai ? cat.categoriaPai.Nome : 'N/A (Raiz)'}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

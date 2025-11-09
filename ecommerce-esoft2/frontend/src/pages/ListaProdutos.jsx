@@ -1,3 +1,5 @@
+// frontend/src/pages/ListaProdutos.jsx (CORRIGIDO E COMPLETO)
+
 import React, { useState, useEffect } from 'react';
 import ProdutoService from '../services/ProdutoService';
 import { Link } from 'react-router-dom';
@@ -7,21 +9,21 @@ import {
     Box,
     Typography,
     Button,
-    Paper,             // O container cinza escuro
+    Paper,             
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    CircularProgress,  // Spinner de carregamento
-    Container,         // Para limitar a largura da tabela
-    Alert,             // Para exibir a mensagem de erro
-    AlertTitle         // Título para o Alerta
+    CircularProgress,  
+    Container,         
+    Alert,             
+    AlertTitle         
 } from '@mui/material';
 // --- Ícones ---
 import AddIcon from '@mui/icons-material/Add'; 
-import EditIcon from '@mui/icons-material/Edit'; // Ícone para o botão "Editar"
+import EditIcon from '@mui/icons-material/Edit'; 
 
 function ListaProdutos() {
     const [produtos, setProdutos] = useState([]);
@@ -43,7 +45,7 @@ function ListaProdutos() {
             });
     }, []);
     
-    // --- Renderização de Estados ---
+    // --- Renderização de Estados (Nenhuma mudança necessária) ---
     
     if (loading) return (
         <Box sx={{ 
@@ -70,7 +72,7 @@ function ListaProdutos() {
 
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
-            {/* --- CABEÇALHO DA PÁGINA --- */}
+            {/* --- CABEÇALHO DA PÁGINA (Nenhuma mudança necessária) --- */}
             <Box sx={{ 
                 display: 'flex', 
                 justifyContent: 'space-between', 
@@ -94,6 +96,7 @@ function ListaProdutos() {
             {/* --- TABELA (MUI) --- */}
             <TableContainer component={Paper}>
                 <Table>
+                    {/* Cabeçalho (Nenhuma mudança) */}
                     <TableHead>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 'bold' }}>Nome</TableCell>
@@ -104,29 +107,46 @@ function ListaProdutos() {
                             <TableCell sx={{ fontWeight: 'bold' }} align="right">Ações</TableCell>
                         </TableRow>
                     </TableHead>
+                    
+                    {/* Corpo da Tabela (AQUI ESTÃO AS MUDANÇAS) */}
                     <TableBody>
                         {produtos.map(produto => (
                             <TableRow 
-                                key={produto._id}
+                                // 1. (MUDANÇA) 'key' usa a nova PK do SQL
+                                key={produto.ID_produto}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
-                                <TableCell sx={{ fontWeight: 500 }}>{produto.nome}</TableCell>
+                                {/* 2. (MUDANÇA) 'nome' agora é 'Nome' */}
+                                <TableCell sx={{ fontWeight: 500 }}>{produto.Nome}</TableCell>
+                                
+                                {/* 3. (MUDANÇA) 'preco' agora é 'Preco' */}
                                 <TableCell>
-                                    R$ {Number(produto.preco).toFixed(2).replace('.', ',')}
+                                    R$ {Number(produto.Preco).toFixed(2).replace('.', ',')}
                                 </TableCell>
-                                <TableCell>{produto.estoque}</TableCell>
+                                
+                                {/* 4. (MUDANÇA) 'estoque' agora é 'Estoque' */}
+                                <TableCell>{produto.Estoque}</TableCell>
+                                
+                                {/* 5. (MUDANÇA) 'categoria.nome' agora é 'categoria.Nome' */}
                                 <TableCell>
-                                    {produto.categoria ? produto.categoria.nome : 'N/A'}
+                                    {produto.categoria ? produto.categoria.Nome : 'N/A'}
                                 </TableCell>
+                                
+                                {/* 6. (MUDANÇA) Esta é a maior mudança. */}
+                                {/* O nome do Vendedor agora está em 'vendedor.usuarioBase.Nome' */}
                                 <TableCell>
-                                    {produto.vendedor ? produto.vendedor.nome || 'N/A' : 'N/A'}
+                                    {produto.vendedor && produto.vendedor.usuarioBase 
+                                        ? produto.vendedor.usuarioBase.Nome 
+                                        : 'N/A'}
                                 </TableCell>
+                                
                                 <TableCell align="right">
                                     <Button 
                                         component={Link} 
-                                        to={`/produtos/editar/${produto._id}`} 
-                                        variant="text" // Botão sutil
-                                        color="primary" // Cor branca (do tema)
+                                        // 7. (MUDANÇA) Link usa a nova PK
+                                        to={`/produtos/editar/${produto.ID_produto}`} 
+                                        variant="text" 
+                                        color="primary" 
                                         startIcon={<EditIcon />}
                                     >
                                         Editar
@@ -138,7 +158,7 @@ function ListaProdutos() {
                 </Table>
             </TableContainer>
             
-            {/* Mensagem de Tabela Vazia */}
+            {/* Mensagem de Tabela Vazia (Nenhuma mudança) */}
             {produtos.length === 0 && (
                  <Typography color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
                      Nenhum produto cadastrado no momento.

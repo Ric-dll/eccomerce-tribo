@@ -1,27 +1,41 @@
-//Define o Produto, com referências para Categoria e Vendedor
+// backend/src/models/Produto.js
+import { Model, DataTypes } from 'sequelize';
 
-import mongoose from 'mongoose';
-
-const produtoEsquema = new mongoose.Schema({
-    nome: {type: String, required: [true, 'O nome do produto é obrigatório'], trim: true},
-    descricao: {type: String},
-    preco: {type: Number, required: [true, 'O preco é obrgatório'], min: [0, 'O preço não pode ser negativo']},
-    estoque: {type: Number, required: [true, 'O estoque é obrigatório'], min: [0, 'O estoque não pode ser negativo']},
-    ativo: {type: Boolean, default: true},
-
-    //Referências para outras coleções
-    categoria: {type: mongoose.Schema.Types.ObjectId, ref: 'Categoria', required: true},
-    //vendedor: {type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', reqiured: true},
-    vendedor: {type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: false},
-
-    //Subdocumentos
-    imagens: [{
-        url : {type: String, required: true},
-        ordem: {type: Number},
-    }],
-
-}, {timestamps: true});
-
-const Produto = mongoose.model('Produto', produtoEsquema);
-
+class Produto extends Model {
+    static init(sequelize) {
+        super.init({
+            ID_produto: {
+                type: DataTypes.INTEGER,
+                primaryKey: true,
+                autoIncrement: true
+            },
+            Nome: {
+                type: DataTypes.STRING(150),
+                allowNull: false
+            },
+            Descricao: {
+                type: DataTypes.TEXT
+            },
+            Preco: {
+                type: DataTypes.DECIMAL(10, 2),
+                allowNull: false
+            },
+            Estoque: {
+                type: DataTypes.INTEGER,
+                allowNull: false
+            },
+            Ativo: {
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+                defaultValue: true
+            }
+            // Categoria_ID (FK) e Vendedor_ID (FK) são adicionadas no db.js
+        }, {
+            sequelize,
+            modelName: 'Produto',
+            tableName: 'Produto'
+        });
+        return this;
+    }
+}
 export default Produto;
