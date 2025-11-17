@@ -1,6 +1,7 @@
 // backend/src/controllers/ProdutoController.js
 
 import { models, sequelize } from '../config/db.js';
+import { Op } from 'sequelize';
 
 // Importamos todos os modelos que vamos usar/incluir
 const { Produto, Usuario, Categoria, ImagemProduto, Vendedor } = models;
@@ -8,8 +9,8 @@ const { Produto, Usuario, Categoria, ImagemProduto, Vendedor } = models;
 //[POST] Endpoint de Cadastro
 const cadastrarProduto = async (req, res) => {
     // Usamos os nomes exatos das FKs do seu modelo
-    const {Nome, Descricao, Preco, Estoque, Categoria_ID, Vendedor_ID, imagens} = req.body;
-    
+    const {Nome, Descricao, Preco, Estoque, Categoria_ID, imagens, Vendedor_ID = null} = req.body;
+
     const t = await sequelize.transaction();
 
     try{   
@@ -21,16 +22,22 @@ const cadastrarProduto = async (req, res) => {
         }
         
         // O Vendedor_ID é o ID da tabela Vendedor (que é o mesmo ID_usuario)
-        const vendedorExiste = await Vendedor.findByPk(Vendedor_ID);
-        if(!vendedorExiste){
-            await t.rollback();
-            return res.status(404).json({ mensagem: 'Vendedor não encontrado.' });
-        }
+        // const vendedorExiste = await Vendedor.findByPk(Vendedor_ID);
+        // if(!vendedorExiste){
+        //     await t.rollback();
+        //     return res.status(404).json({ mensagem: 'Vendedor não encontrado.' });
+        // }
         
         // 1. Criar o Produto
+        // const novoProduto = await Produto.create({ 
+        //     Nome, Descricao, Preco, Estoque, Categoria_ID, 
+        //     Vendedor_ID, // Vendedor_ID agora é obrigatório (required: true no Mongoose)
+        //     Ativo: true 
+        // }, { transaction: t });
+
         const novoProduto = await Produto.create({ 
             Nome, Descricao, Preco, Estoque, Categoria_ID, 
-            Vendedor_ID, // Vendedor_ID agora é obrigatório (required: true no Mongoose)
+            Vendedor_ID: Vendedor_ID, // Agora é opcional (pode ser null)
             Ativo: true 
         }, { transaction: t });
 
@@ -77,30 +84,60 @@ const cadastrarProduto = async (req, res) => {
 //[GET] Endpoint de Listagem
 const listarProdutos = async (req, res) => {
     try {
-        const produtos = await Produto.findAll({
+        // 1. LÊ OS QUERY PARAMS DA URL
+        // Ex: /api/produtos?search=nome&sort=Preco&order=DESC
+        const { search, sort, order } = req.query;
+
+        // 2. MONTA A BASE DA QUERY
+        // (Mantém os 'includes' que já tínhamos para Categoria, Vendedor e Imagens)
+        let options = {
             include: [
                 { 
-                    model: Categoria, 
+                    model: models.Categoria, 
                     as: 'categoria',
                     attributes: ['ID_categoria', 'Nome']
                 }, 
                 { 
-                    model: Vendedor, 
+                    model: models.Vendedor, 
                     as: 'vendedor',
-                    attributes: ['ID_usuario', 'AreaResponsavel'], // Campos do Vendedor
-                    include: [{ // JOIN para pegar dados do Usuario base
-                        model: Usuario,
+                    attributes: ['ID_usuario', 'AreaResponsavel'], 
+                    include: [{ 
+                        model: models.Usuario,
                         as: 'usuarioBase',
                         attributes: ['Nome', 'Email']
                     }]
                 },
                 {
-                    model: ImagemProduto,
+                    model: models.ImagemProduto,
                     as: 'imagens',
                     attributes: ['ID_imagem', 'URL', 'Ordem']
                 }
-            ]
-        });
+            ],
+            order: [['Nome', 'ASC']]
+        };
+
+        // 3. ADICIONA O FILTRO DE BUSCA (SE EXISTIR)
+        if (search) {
+            options.where = {
+                Nome: {
+                    [Op.like]: `%${search}%` // Op.like é o "LIKE" do SQL (Ex: %camiseta%)
+                }
+            };
+        }
+
+        // 4. ADICIONA A ORDENAÇÃO (SE EXISTIR)
+        // (Validamos para permitir ordenar apenas por colunas seguras)
+        const colunasValidas = ['Nome', 'Preco', 'Estoque', 'createdAt', 'updatedAt'];
+        const ordemValida = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
+
+        if (sort && colunasValidas.includes(sort)) {
+            options.order = [
+                [sort, ordemValida] // Ex: [['Preco', 'ASC']]
+            ];
+        }
+
+        // 5. EXECUTA A CONSULTA
+        const produtos = await models.Produto.findAll(options);
             
         res.status(200).json(produtos);
     } catch (error) {

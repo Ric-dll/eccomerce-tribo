@@ -13,6 +13,9 @@ import usuarioRoutes from './routes/usuarioRoutes.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
 import produtoRoutes from './routes/produtoRoutes.js';
 
+import carrinhoRoutes from './routes/carrinhoRoutes.js';
+import pedidoRoutes from './routes/pedidoRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 // 2. CONEXÃO E INICIALIZAÇÃO
 // Chama a função para conectar ao DB (a função já cuida de erros e logs)
@@ -42,7 +45,10 @@ app.get('/', (req, res) => {
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/produtos', produtoRoutes);
-
+//Novas importações
+app.use('/api/carrinho', carrinhoRoutes);
+app.use('/api/pedidos', pedidoRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 5. INICIALIZAÇÃO DO SERVIDOR
 app.listen(PORT, () => {
