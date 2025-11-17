@@ -2,6 +2,12 @@
 
 import { Sequelize } from 'sequelize';
 import 'dotenv/config';
+import StatusPedido from '../models/StatusPedido.js'; // NOVO
+import Carrinho from '../models/Carrinho.js';       // NOVO
+import ItemCarrinho from '../models/ItemCarrinho.js'; // NOVO
+import Pedido from '../models/Pedido.js';           // NOVO
+import ItemPedido from '../models/ItemPedido.js';     // NOVO
+
 
 // --- ADICIONE ISTO PARA DEPURAR ---
 console.log("--- DEBUG DO .ENV ---");
@@ -54,6 +60,12 @@ const models = {
     Categoria: Categoria.init(sequelize, Sequelize),
     Produto: Produto.init(sequelize, Sequelize),
     ImagemProduto: ImagemProduto.init(sequelize, Sequelize),
+    ImagemProduto: ImagemProduto.init(sequelize, Sequelize),
+    StatusPedido: StatusPedido.init(sequelize, Sequelize), // NOVO
+    Carrinho: Carrinho.init(sequelize, Sequelize),         // NOVO
+    ItemCarrinho: ItemCarrinho.init(sequelize, Sequelize), // NOVO
+    Pedido: Pedido.init(sequelize, Sequelize),             // NOVO
+    ItemPedido: ItemPedido.init(sequelize, Sequelize),     // NOVO
 };
 
 // 3. Definição das Associações (Relações)
@@ -86,13 +98,49 @@ models.Produto.belongsTo(models.Categoria, { foreignKey: 'Categoria_ID', as: 'ca
 // Produto N:1 Vendedor
 // NOTA: Seu modelo diz Vendedor_ID, então a FK é 'Vendedor', que herda 'ID_usuario'
 models.Vendedor.hasMany(models.Produto, { foreignKey: 'Vendedor_ID', as: 'produtos' });
-models.Produto.belongsTo(models.Vendedor, { foreignKey: 'Vendedor_ID', as: 'vendedor' });
+
+models.Produto.belongsTo(models.Vendedor, { 
+    foreignKey: {
+        name: 'Vendedor_ID',
+        allowNull: true  // <-- AQUI ESTÁ A MUDANÇA
+    }, 
+    as: 'vendedor' 
+});
 
 // Produto 1:N ImagemProduto
 models.Produto.hasMany(models.ImagemProduto, { foreignKey: 'Produto_ID', as: 'imagens' });
 models.ImagemProduto.belongsTo(models.Produto, { foreignKey: 'Produto_ID', as: 'produto' });
+// --- NOVAS RELAÇÕES DE CARRINHO ---
+// Cliente 1:1 Carrinho (Um cliente tem um carrinho)
+models.Cliente.hasOne(models.Carrinho, { foreignKey: 'Cliente_ID', unique: true });
+models.Carrinho.belongsTo(models.Cliente, { foreignKey: 'Cliente_ID' });
 
+// Carrinho 1:N ItemCarrinho (Um carrinho tem N itens)
+models.Carrinho.hasMany(models.ItemCarrinho, { foreignKey: 'ID_carrinho', as: 'itens' });
+models.ItemCarrinho.belongsTo(models.Carrinho, { foreignKey: 'ID_carrinho' });
 
+// Produto 1:N ItemCarrinho (Um produto pode estar em N carrinhos)
+models.Produto.hasMany(models.ItemCarrinho, { foreignKey: 'Produto_ID' });
+models.ItemCarrinho.belongsTo(models.Produto, { foreignKey: 'Produto_ID', as: 'produto' });
+
+// --- NOVAS RELAÇÕES DE PEDIDO ---
+// Cliente 1:N Pedido (Um cliente tem N pedidos)
+models.Cliente.hasMany(models.Pedido, { foreignKey: 'Cliente_ID' });
+models.Pedido.belongsTo(models.Cliente, { foreignKey: 'Cliente_ID' });
+
+// StatusPedido 1:N Pedido (Um status pode estar em N pedidos)
+models.StatusPedido.hasMany(models.Pedido, { foreignKey: 'StatusPedido_ID' });
+models.Pedido.belongsTo(models.StatusPedido, { foreignKey: 'StatusPedido_ID', as: 'status' });
+
+// Pedido 1:N ItemPedido (Um pedido tem N itens)
+models.Pedido.hasMany(models.ItemPedido, { foreignKey: 'Pedido_ID', as: 'itens' });
+models.ItemPedido.belongsTo(models.Pedido, { foreignKey: 'Pedido_ID' });
+
+// Produto 1:N ItemPedido (Um produto pode estar em N itens de pedido)
+models.Produto.hasMany(models.ItemPedido, { foreignKey: 'Produto_ID' });
+models.ItemPedido.belongsTo(models.Produto, { foreignKey: 'Produto_ID', as: 'produto' });
+
+// (Fim das novas associações)
 console.log("(V) Modelos e associações inicializados.");
 
 // 4. Função de Conexão

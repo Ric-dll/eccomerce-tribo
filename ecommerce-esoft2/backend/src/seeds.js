@@ -1,10 +1,9 @@
-// backend/src/seed.js (VERSÃO COMPLETA E FINAL)
+// backend/src/seeds.js (VERSÃO FINAL COMPLETA - Garante E-mail Único)
 
 import { sequelize, models } from './config/db.js';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 
 // IDs das subcategorias que VAMOS CRIAR (Camisetas, Polo, Jeans, Bermudas, Bonés)
-// O script vai garantir que elas tenham esses IDs
 const CATEGORIA_IDS = [4, 5, 6, 7, 8];
 
 // IDs dos Tipos de Usuário que VAMOS CRIAR
@@ -19,19 +18,21 @@ const TIPOS_BERMUDA = ["Sarja", "Moletom", "Cargo", "Chino", "Jeans"];
 const TIPOS_POLO = ["Piquet", "Malha", "Listrada", "Lisa"];
 const TIPOS_BONE = ["Aba Curva", "Aba Reta", "Trucker", "Dad Hat"];
 const CORES = ["Preta", "Branca", "Cinza Mescla", "Azul Marinho", "Vermelha", "Verde Musgo", "Bege"];
-const LAVAGENS_JEANS = ["Clássica", "Escura", "Destroyed", "Delavê"]; // Adicionado para Jeans
+const LAVAGENS_JEANS = ["Clássica", "Escura", "Destroyed", "Delavê"];
 
 // --- NOSSAS FUNÇÕES "FÁBRICA" ---
 
 const gerarTelefone = () => `(11) 9${faker.string.numeric(4)}-${faker.string.numeric(4)}`;
 
-async function criarVendedor(area) {
+// 1. (MUDANÇA) Adicionado 'i' (índice) para garantir email único
+async function criarVendedor(area, i) { 
     const nome = faker.person.firstName();
     const sobrenome = faker.person.lastName();
 
     const usuario = await models.Usuario.create({
         Nome: `${nome} ${sobrenome} (Vendedor)`,
-        Email: faker.internet.email({ firstName: nome, lastName: sobrenome, provider: 'loja.com' }),
+        // 2. (MUDANÇA) Adicionado 'i' ao sobrenome para o email
+        Email: faker.internet.email({ firstName: nome, lastName: `${sobrenome}${i}`, provider: 'loja.com' }),
         Senha_hash: '$2a$10$fakehash...senha123',
         Telefone: gerarTelefone(), Data_cadastro: new Date(), TipoUsuario_ID: TIPO_VENDEDOR_ID, Ativo: true,
     });
@@ -42,26 +43,29 @@ async function criarVendedor(area) {
     return usuario;
 }
 
-async function criarCliente() {
+// 3. (MUDANÇA) Adicionado 'i' (índice) para garantir email único
+async function criarCliente(i) {
     const nome = faker.person.firstName();
     const sobrenome = faker.person.lastName();
 
     const usuario = await models.Usuario.create({
         Nome: `${nome} ${sobrenome}`,
-        Email: faker.internet.email({ firstName: nome, lastName: sobrenome, provider: 'cliente.com' }),
+        // 4. (MUDANÇA) Adicionado 'i' ao sobrenome para o email
+        Email: faker.internet.email({ firstName: nome, lastName: `${sobrenome}${i}`, provider: 'cliente.com' }),
         Senha_hash: '$2a$10$fakehash...senha123',
         Telefone: gerarTelefone(), Data_cadastro: new Date(), TipoUsuario_ID: TIPO_CLIENTE_ID, Ativo: true,
     });
     
     await models.Cliente.create({
         ID_usuario: usuario.ID_usuario,
-        CPF: faker.string.numeric(11), // <-- ESTA É A CORREÇÃO
+        CPF: faker.string.numeric(11), // Correção do CPF
         DataNasc: faker.date.birthdate({ min: 18, max: 65, mode: 'age' }),
     });
     return usuario;
 }
 
-async function criarProduto(vendedorId) {
+// Função 'criarProduto' não recebe mais 'vendedorId'
+async function criarProduto() {
     const catId = faker.helpers.arrayElement(CATEGORIA_IDS);
     let nomeProduto = '';
 
@@ -81,6 +85,8 @@ async function criarProduto(vendedorId) {
         case 8: 
             nomeProduto = `Boné ${faker.helpers.arrayElement(TIPOS_BONE)} (${faker.helpers.arrayElement(CORES)})`;
             break;
+        default:
+            nomeProduto = "Produto Genérico"; // Fallback
     }
 
     await models.Produto.create({
@@ -88,7 +94,9 @@ async function criarProduto(vendedorId) {
         Descricao: `Produto de alta qualidade: ${nomeProduto}. 100% Algodão.`,
         Preco: faker.commerce.price({ min: 79, max: 350, dec: 2 }),
         Estoque: faker.number.int({ min: 20, max: 200 }),
-        Ativo: true, Categoria_ID: catId, Vendedor_ID: vendedorId,
+        Ativo: true, 
+        Categoria_ID: catId, 
+        Vendedor_ID: null // Vendedor_ID agora é nulo
     });
 }
 
@@ -170,7 +178,8 @@ const popularBanco = async () => {
         const vendedoresCriados = [];
         const areasVenda = ["Camisetas", "Calças", "Acessórios", "Estoque", "Gerência", "Social", "Esportivo", "Tênis", "Relógios", "Básico"];
         for (let i = 0; i < TOTAL_VENDEDORES; i++) {
-            const vendedor = await criarVendedor(areasVenda[i % areasVenda.length]);
+            // 5. (MUDANÇA) Passando 'i' para a função
+            const vendedor = await criarVendedor(areasVenda[i % areasVenda.length], i);
             vendedoresCriados.push(vendedor);
         }
         console.log("✅ Vendedores criados!");
@@ -179,20 +188,17 @@ const popularBanco = async () => {
         console.log(`\nCriando ${TOTAL_CLIENTES} Clientes...`);
         const promessasClientes = [];
         for (let i = 0; i < TOTAL_CLIENTES; i++) {
-            promessasClientes.push(criarCliente());
+            // 6. (MUDANÇA) Passando 'i' para a função
+            promessasClientes.push(criarCliente(i));
         }
         await Promise.all(promessasClientes);
         console.log("✅ Clientes criados!");
         
         // 5. CRIA OS PRODUTOS
         console.log(`\nCriando ${TOTAL_PRODUTOS} Produtos...`);
-        const todosVendedores = await models.Vendedor.findAll();
-        const VENDEDOR_IDS = todosVendedores.map(v => v.ID_usuario);
-
         const promessasProdutos = [];
         for (let i = 0; i < TOTAL_PRODUTOS; i++) {
-            const vendedorAleatorioId = faker.helpers.arrayElement(VENDEDOR_IDS);
-            promessasProdutos.push(criarProduto(vendedorAleatorioId));
+            promessasProdutos.push(criarProduto()); // Não passa mais ID de vendedor
         }
         await Promise.all(promessasProdutos); 
         console.log("✅ Produtos criados!");
@@ -205,8 +211,10 @@ const popularBanco = async () => {
     } catch (error) {
         console.error("\n❌ ERRO AO POPULAR O BANCO:", error);
     } finally {
+        // Fecha a conexão para o script terminar
         await sequelize.close();
     }
 };
 
+// Inicia o script
 popularBanco();

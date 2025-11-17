@@ -2,6 +2,7 @@
 
 import { models } from '../config/db.js';
 const { Categoria } = models;
+import { Op } from 'sequelize';
 
 //[POST] Endpoint de Cadastro
 const cadastrarCategoria = async (req, res) => {
@@ -23,14 +24,29 @@ const cadastrarCategoria = async (req, res) => {
 // [GET] Endpoint de Listagem
 const listarCategorias = async (req, res) => {
     try {
-        // O 'include' usa a associação 'categoriaPai' definida no db.js
-        const categorias = await Categoria.findAll({
+        const { search, sort, order } = req.query;
+
+        let options = {
             include: [{
-                model: Categoria,
+                model: models.Categoria,
                 as: 'categoriaPai',
-                attributes: ['ID_categoria', 'Nome'] // Seleciona campos do pai
-            }]
-        });
+                attributes: ['ID_categoria', 'Nome'] 
+            }],
+            order: [['Nome', 'ASC']]
+        };
+
+        if (search) {
+            options.where = {
+                Nome: { [Op.like]: `%${search}%` }
+            };
+        }
+
+        const ordemValida = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
+        if (sort === 'Nome') { // Aqui só permitimos ordenar por Nome
+            options.order = [['Nome', ordemValida]];
+        }
+
+        const categorias = await models.Categoria.findAll(options);
         res.status(200).json(categorias);
     } catch (error) {
         res.status(500).json({ mensagem: 'Erro ao listar categorias.', detalhes: error.message });

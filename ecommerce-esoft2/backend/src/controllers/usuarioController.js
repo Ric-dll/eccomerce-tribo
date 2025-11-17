@@ -3,6 +3,7 @@
 // Importamos todos os modelos necessários e o sequelize (para transações)
 import { models, sequelize } from '../config/db.js';
 import bcrypt from 'bcryptjs';
+import { Op } from 'sequelize';
 
 // Pegamos os modelos pelo nome para facilitar
 const { Usuario, Cliente, Vendedor, TipoUsuario } = models;
@@ -124,18 +125,37 @@ const cadastrarVendedor = async (req, res) => {
 }
 
 // [GET] Endpoint de Listagem de Clientes
-const listarClientes = async(req, res) => {
-    try{
-        // Encontra o ID do Tipo "Cliente"
-        const tipoCliente = await TipoUsuario.findOne({ where: { Nome: 'Cliente' } });
+const listarClientes = async (req, res) => {
+    try {
+        const { search, sort, order } = req.query;
+
+        const tipoCliente = await models.TipoUsuario.findOne({ where: { Nome: 'Cliente' } });
         
-        const clientes = await Usuario.findAll({ 
-            where: { TipoUsuario_ID: tipoCliente.ID_Tipo, Ativo: true },
-            attributes: { exclude: ['Senha_hash'] }, // Exclui senha
+        let options = { 
+            where: { 
+                TipoUsuario_ID: tipoCliente.ID_Tipo, 
+                Ativo: true 
+            },
+            attributes: { exclude: ['Senha_hash'] },
             include: [
-                { model: Cliente, as: 'clienteInfo', required: true } // 'required: true' faz um INNER JOIN
-            ]
-        });
+                { model: models.Cliente, as: 'clienteInfo', required: true } 
+            ],
+            order: [['Nome', 'ASC']]
+        };
+        
+        // Adiciona a busca ao 'where' que já existe
+        if (search) {
+            options.where.Nome = { [Op.like]: `%${search}%` };
+        }
+
+        // Adiciona ordenação
+        const colunasValidas = ['Nome', 'Email', 'createdAt'];
+        const ordemValida = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
+        if (sort && colunasValidas.includes(sort)) {
+            options.order = [[sort, ordemValida]];
+        }
+
+        const clientes = await models.Usuario.findAll(options);
         res.status(200).json(clientes);        
     } catch (error) {
         res.status(500).json({ mensagem: 'Erro ao listar clientes.', detalhes: error.message });
@@ -145,15 +165,35 @@ const listarClientes = async(req, res) => {
 // [GET] Endpoint de Listagem de Vendedores
 const listarVendedores = async (req, res) => {
     try {
-        const tipoVendedor = await TipoUsuario.findOne({ where: { Nome: 'Vendedor' } });
+        const { search, sort, order } = req.query;
 
-        const vendedores = await Usuario.findAll({ 
-            where: { TipoUsuario_ID: tipoVendedor.ID_Tipo, Ativo: true },
+        const tipoVendedor = await models.TipoUsuario.findOne({ where: { Nome: 'Vendedor' } });
+
+        let options = { 
+            where: { 
+                TipoUsuario_ID: tipoVendedor.ID_Tipo, 
+                Ativo: true 
+            },
             attributes: { exclude: ['Senha_hash'] },
             include: [
-                { model: Vendedor, as: 'vendedorInfo', required: true }
-            ]
-        });
+                { model: models.Vendedor, as: 'vendedorInfo', required: true }
+            ],
+            order: [['Nome', 'ASC']]
+        };
+
+        // Adiciona a busca ao 'where' que já existe
+        if (search) {
+            options.where.Nome = { [Op.like]: `%${search}%` };
+        }
+
+        // Adiciona ordenação
+        const colunasValidas = ['Nome', 'Email', 'createdAt'];
+        const ordemValida = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
+        if (sort && colunasValidas.includes(sort)) {
+            options.order = [[sort, ordemValida]];
+        }
+
+        const vendedores = await models.Usuario.findAll(options);
         res.status(200).json(vendedores);
     } catch (error) {
         res.status(500).json({ mensagem: 'Erro ao listar vendedores.', detalhes: error.message });
