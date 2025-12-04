@@ -1,4 +1,3 @@
-// backend/src/models/Usuario.js
 import { Model, DataTypes } from 'sequelize';
 
 class Usuario extends Model {

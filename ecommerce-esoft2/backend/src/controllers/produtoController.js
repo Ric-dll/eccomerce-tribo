@@ -1,9 +1,7 @@
-// backend/src/controllers/ProdutoController.js
-
 import { models, sequelize } from '../config/db.js';
 import { Op } from 'sequelize';
 
-// Importamos todos os modelos que vamos usar/incluir
+// Importamos todos os modelos que vamos usar/incluirincluir
 const { Produto, Usuario, Categoria, ImagemProduto, Vendedor } = models;
 
 //[POST] Endpoint de Cadastro

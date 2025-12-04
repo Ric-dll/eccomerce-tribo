@@ -1,10 +1,6 @@
-// frontend/src/pages/CadastroProduto.jsx (REVERTIDO - Sem Vendedor)
-
 import React, { useState, useEffect } from 'react';
 import ProdutoService from '../services/ProdutoService';
 import CategoriaService from '../services/CategoriaService';
-// Removido 'UsuarioService'
-
 import { useNavigate } from 'react-router-dom';
 import {
     Box, TextField, Button, Typography, Paper, Alert,
@@ -17,19 +13,16 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 function CadastroProduto() {
     const navigate = useNavigate(); 
     
-    // Removido 'Vendedor_ID' do estado
     const [formData, setFormData] = useState({
         Nome: '', Descricao: '', Preco: '', Estoque: '', Categoria_ID: '',
     });
     
     const [categorias, setCategorias] = useState([]);
-    // Removido 'vendedores' state
+
     const [message, setMessage] = useState('');
     
-    // Simplificado o 'loading' de volta para um
     const [loading, setLoading] = useState(true); 
 
-    // Simplificado o 'useEffect' para buscar APENAS categorias
     useEffect(() => {
         setLoading(true);
         CategoriaService.listarCategorias()
@@ -41,7 +34,7 @@ function CadastroProduto() {
                 setMessage("Erro ao carregar categorias. Tente recarregar.");
             })
             .finally(() => {
-                setLoading(false); // Termina o loading da PÁGINA
+                setLoading(false); // Termina o loading
             });
     }, []);
 
@@ -58,14 +51,12 @@ function CadastroProduto() {
         setMessage('');
         setLoading(true); // Usa o loading principal
 
-        // Removida validação de Vendedor_ID
         if (!formData.Categoria_ID) {
             setMessage('Por favor, selecione uma Categoria.');
             setLoading(false);
             return;
         }
-        
-        // Removido 'Vendedor_ID' do objeto de envio
+    
         const dataToSend = {
             Nome: formData.Nome,
             Descricao: formData.Descricao,
@@ -74,8 +65,8 @@ function CadastroProduto() {
             Categoria_ID: parseInt(formData.Categoria_ID, 10),
             // (O mock de imagens ainda está aqui)
             imagens: [
-                { url: 'http://example.com/imagem_mock_1.jpg', ordem: 0 },
-                { url: 'http://example.com/imagem_mock_2.jpg', ordem: 1 }
+                { url: 'http://examplo.com/imagemQualquer.png', ordem: 0 },
+                { url: 'http://examplo.com/imagemQualquer.png', ordem: 1 }
             ]
         };
 
@@ -88,8 +79,6 @@ function CadastroProduto() {
         try {
             await ProdutoService.cadastrarProduto(dataToSend);
             setMessage('✅ Produto cadastrado com sucesso! Redirecionando...');
-            
-            // Removido 'Vendedor_ID' do reset
             setFormData({ Nome: '', Descricao: '', Preco: '', Estoque: '', Categoria_ID: '' });
             setTimeout(() => navigate('/produtos'), 1500); 
 
@@ -181,7 +170,7 @@ function CadastroProduto() {
                                     ))}
                                 </TextField>
 
-                                {/* --- CAMPO DE VENDEDOR REMOVIDO --- */}
+                                {/* --- CAMPO DE VENDEDOR FOI REMOVIDO PARA ESSA ÚLTIMA VERSÃO --- */}
 
                             </Box>
                         </Grid>

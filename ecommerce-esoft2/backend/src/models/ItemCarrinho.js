@@ -1,26 +1,36 @@
-// backend/src/models/Carrinho.js
 import { Model, DataTypes } from 'sequelize';
 
-class Carrinho extends Model {
+class ItemCarrinho extends Model {
     static init(sequelize) {
         super.init({
+            // Chave Primária Composta
             ID_carrinho: {
                 type: DataTypes.INTEGER,
                 primaryKey: true,
-                autoIncrement: true
+                references: {
+                    model: 'Carrinho',
+                    key: 'ID_carrinho'
+                }
             },
-            DataCriacao: {
-                type: DataTypes.DATE,
+            Produto_ID: {
+                type: DataTypes.INTEGER,
+                primaryKey: true,
+                references: {
+                    model: 'Produto',
+                    key: 'ID_produto'
+                }
+            },
+            Quantidade: {
+                type: DataTypes.INTEGER,
                 allowNull: false,
-                defaultValue: DataTypes.NOW
+                defaultValue: 1
             }
-            // Cliente_ID é a Chave Estrangeira (definida no db.js)
         }, {
             sequelize,
-            modelName: 'Carrinho',
-            tableName: 'Carrinho'
+            modelName: 'ItemCarrinho',
+            tableName: 'ItemCarrinho'
         });
         return this;
     }
 }
-export default Carrinho;
+export default ItemCarrinho;

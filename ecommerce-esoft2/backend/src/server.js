@@ -53,4 +53,4 @@ app.use('/api/admin', adminRoutes);
 // 5. INICIALIZAÇÃO DO SERVIDOR
 app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
-});
+    });

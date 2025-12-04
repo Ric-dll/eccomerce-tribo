@@ -1,5 +1,3 @@
-// frontend/src/services/UsuarioService.js
-// Este serviço se comunica com /api/usuarios/*
 import api from './api';
 
 const UsuarioService = {
@@ -9,8 +7,9 @@ const UsuarioService = {
     },
 
     // Rota: GET /api/usuarios/clientes
-    listarClientes: () => {
-        return api.get('/usuarios/clientes');
+    // MUDANÇA: Agora aceita 'params' (search, sort, order)
+    listarClientes: (params) => {
+        return api.get('/usuarios/clientes', { params }); 
     },
 
     // Rota: POST /api/usuarios/vendedores
@@ -19,8 +18,9 @@ const UsuarioService = {
     },
 
     // Rota: GET /api/usuarios/vendedores
-    listarVendedores: () => {
-        return api.get('/usuarios/vendedores');
+    // MUDANÇA: Agora aceita 'params'
+    listarVendedores: (params) => {
+        return api.get('/usuarios/vendedores', { params });
     },
 };
 

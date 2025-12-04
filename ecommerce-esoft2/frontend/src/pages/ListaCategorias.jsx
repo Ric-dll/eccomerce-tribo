@@ -1,5 +1,3 @@
-// frontend/src/pages/ListaCategorias.jsx (CORRIGIDO E COMPLETO)
-
 import React, { useState, useEffect } from 'react';
 import CategoriaService from '../services/CategoriaService';
 import { Link } from 'react-router-dom';
@@ -25,7 +23,6 @@ function ListaCategorias() {
     const [categorias, setCategorias] = useState([]);
     const [loading, setLoading] = useState(true); 
 
-    // Nenhuma mudança necessária no useEffect
     useEffect(() => {
         CategoriaService.listarCategorias()
             .then(response => {
@@ -38,7 +35,6 @@ function ListaCategorias() {
             });
     }, []);
 
-    // Nenhuma mudança necessária na tela de carregamento
     if (loading) {
         return (
             <Box sx={{ 
@@ -53,7 +49,6 @@ function ListaCategorias() {
         );
     }
 
-    // Nenhuma mudança necessária no Container ou no Cabeçalho
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}> 
             
@@ -83,7 +78,7 @@ function ListaCategorias() {
                 component={Paper}
             >
                 <Table>
-                    {/* Cabeçalho da Tabela (Nenhuma mudança) */}
+                    {/* Cabeçalho da Tabela */}
                     <TableHead>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 'bold' }}>Nome</TableCell>
@@ -91,18 +86,18 @@ function ListaCategorias() {
                         </TableRow>
                     </TableHead>
 
-                    {/* Corpo da Tabela (AQUI ESTÃO AS MUDANÇAS) */}
+                    {/* Corpo da Tabela */}
                     <TableBody>
                         {categorias.map(cat => (
                             <TableRow 
-                                // 1. (MUDANÇA) 'key' usa a nova PK do SQL
+                                // 1. 'key' usa a nova PK do SQL
                                 key={cat.ID_categoria}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
-                                {/* 2. (MUDANÇA) Campo 'nome' agora é 'Nome' */}
+                                {/* 2.  Campo 'nome' agora é 'Nome' */}
                                 <TableCell>{cat.Nome}</TableCell>
                                 
-                                {/* 3. (MUDANÇA) 'cat.categoriaPai.nome' agora é 'cat.categoriaPai.Nome' */}
+                                {/* 3. 'cat.categoriaPai.nome' agora é 'cat.categoriaPai.Nome' */}
                                 <TableCell>{cat.categoriaPai ? cat.categoriaPai.Nome : 'N/A (Raiz)'}</TableCell>
                             </TableRow>
                         ))}

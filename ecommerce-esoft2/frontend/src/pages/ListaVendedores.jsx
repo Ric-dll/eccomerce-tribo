@@ -1,5 +1,3 @@
-// frontend/src/pages/ListaVendedores.jsx (CORRIGIDO E COMPLETO)
-
 import React, { useState, useEffect } from 'react';
 import UsuarioService from '../services/UsuarioService';
 import { Link } from 'react-router-dom';
@@ -28,7 +26,6 @@ function ListaVendedores() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Nenhuma mudança necessária no useEffect
     useEffect(() => {
         UsuarioService.listarVendedores()
             .then(response => {
@@ -42,7 +39,7 @@ function ListaVendedores() {
             });
     }, []);
     
-    // --- TELA DE CARREGAMENTO (Nenhuma mudança) ---
+    // --- TELA DE CARREGAMENTO ---
     if (loading) {
         return (
             <Box sx={{ 
@@ -57,7 +54,7 @@ function ListaVendedores() {
         );
     }
     
-    // --- TELA DE ERRO (Nenhuma mudança) ---
+    // --- TELA DE ERRO ---
     if (error) {
         return (
             <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -69,7 +66,7 @@ function ListaVendedores() {
         );
     }
 
-    // --- TELA PRINCIPAL (Nenhuma mudança no Cabeçalho) ---
+    // --- TELA PRINCIPAL ---
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
             
@@ -97,7 +94,7 @@ function ListaVendedores() {
             {/* --- TABELA (MUI) --- */}
             <TableContainer component={Paper}>
                 <Table>
-                    {/* Cabeçalho (Nenhuma mudança) */}
+                    {/* Cabeçalho */}
                     <TableHead>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 'bold' }}>Nome</TableCell>
@@ -107,26 +104,26 @@ function ListaVendedores() {
                         </TableRow>
                     </TableHead>
                     
-                    {/* Corpo da Tabela (AQUI ESTÃO AS MUDANÇAS) */}
+                    {/* Corpo da Tabela  */}
                     <TableBody>
                         {vendedores.map(vendedor => (
                             <TableRow 
-                                // 1. (MUDANÇA) 'key' usa a nova PK do SQL
+                                // 1. 'key' usa a nova PK do SQL
                                 key={vendedor.ID_usuario}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
-                                {/* 2. (MUDANÇA) 'nome' agora é 'Nome' (do obj base) */}
+                                {/* 2.'nome' agora é 'Nome' (do obj base) */}
                                 <TableCell sx={{ fontWeight: 500 }}>{vendedor.Nome}</TableCell>
                                 
-                                {/* 3. (MUDANÇA) 'email' agora é 'Email' (do obj base) */}
+                                {/* 3.'email' agora é 'Email' (do obj base) */}
                                 <TableCell>{vendedor.Email}</TableCell>
                                 
-                                {/* 4. (MUDANÇA) Acessa o obj 'vendedorInfo' aninhado */}
+                                {/* 4. Acessa o obj 'vendedorInfo' aninhado */}
                                 <TableCell>
                                     {vendedor.vendedorInfo ? vendedor.vendedorInfo.AreaResponsavel : 'N/A'}
                                 </TableCell>
                                 
-                                {/* 5. (MUDANÇA) ID usa a nova PK */}
+                                {/* 5. ID usa a nova PK */}
                                 <TableCell sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
                                     {vendedor.ID_usuario}
                                 </TableCell>
@@ -136,7 +133,7 @@ function ListaVendedores() {
                 </Table>
             </TableContainer>
             
-            {/* Mensagem de Tabela Vazia (Nenhuma mudança) */}
+            {/* Mensagem de Tabela Vazia */}
             {vendedores.length === 0 && (
                  <Typography color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
                      Nenhum vendedor cadastrado no momento.

@@ -1,5 +1,3 @@
-// frontend/src/pages/CadastroCliente.jsx (CORRIGIDO)
-
 import React, { useState } from 'react';
 import UsuarioService from '../services/UsuarioService';
 import { Link, useNavigate } from 'react-router-dom';
@@ -19,7 +17,6 @@ function CadastroCliente() {
 
     const navigate = useNavigate();
     
-    // 1. (MUDANÇA) O estado usa os nomes da API SQL
     const [formData, setFormData] = useState({
         Nome: '', Email: '', Senha: '', CPF: '', Telefone: '', DataNasc: '',
     });
@@ -38,13 +35,12 @@ function CadastroCliente() {
         setLoading(true);
 
         try {
-            // 'formData' já está no formato correto que o backend (corrigido) espera
             await UsuarioService.cadastrarCliente(formData);
             
-            // 2. (MUDANÇA) Mensagem de sucesso para o Alert
+            // 2. (Aplicação de MUDANÇA) Mensagem de sucesso para o Alert
             setMessage('✅ Cliente cadastrado com sucesso!');
             
-            // 3. (MUDANÇA) Resetar o formulário com os nomes corretos
+            // 3. (Aplicação de MUDANÇA) Resetar o formulário com os nomes corretos
             setFormData({ Nome: '', Email: '', Senha: '', CPF: '', Telefone: '', DataNasc: '' });
             
             setTimeout(() => navigate('/clientes'), 1500);
@@ -66,13 +62,9 @@ function CadastroCliente() {
                 minHeight: '100vh', 
                 width: '100%', // Garante que o 'pai' ocupe a largura toda
                 
-                // --- A MÁGICA ESTÁ AQUI ---
                 display: 'flex',
                 justifyContent: 'center', // Centraliza horizontalmente
                 alignItems: 'center',     // Centraliza verticalmente
-                // -------------------------
-
-                // Bônus: Pega a cor de fundo do seu tema e adiciona um padding
                 backgroundColor: 'background.default', 
                 color: 'text.primary', 
                 py: 4, // Padding vertical (para rolagem em telas pequenas)
@@ -86,10 +78,10 @@ function CadastroCliente() {
                 }}
             >
                 
-                {/* Logo (Não esqueça de adicionar o seu componente de Logo aqui!) */}
+                {/* Logo */}
                 <Box
                     component="img"
-                    src="/tribo" // <-- NOME DO ARQUIVO DA LOGO (como nos seus outros arquivos)
+                    src="/tribo" // <-- NOME DO ARQUIVO DA LOGO
                     alt="Logo da Loja"
                     sx={{
                         width: 'auto',      

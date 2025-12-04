@@ -1,4 +1,3 @@
-// backend/src/models/Carrinho.js
 import { Model, DataTypes } from 'sequelize';
 
 class Carrinho extends Model {
@@ -14,7 +13,6 @@ class Carrinho extends Model {
                 allowNull: false,
                 defaultValue: DataTypes.NOW
             }
-            // Cliente_ID é a Chave Estrangeira (definida no db.js)
         }, {
             sequelize,
             modelName: 'Carrinho',

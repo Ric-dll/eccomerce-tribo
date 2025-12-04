@@ -1,4 +1,3 @@
-// backend/src/models/ItemPedido.js
 import { Model, DataTypes } from 'sequelize';
 
 class ItemPedido extends Model {

@@ -1,5 +1,3 @@
-// frontend/src/pages/ListaProdutos.jsx (CORRIGIDO E COMPLETO)
-
 import React, { useState, useEffect } from 'react';
 import ProdutoService from '../services/ProdutoService';
 import { Link } from 'react-router-dom';
@@ -45,7 +43,7 @@ function ListaProdutos() {
             });
     }, []);
     
-    // --- Renderização de Estados (Nenhuma mudança necessária) ---
+    // --- Renderização de Estados ---
     
     if (loading) return (
         <Box sx={{ 
@@ -72,7 +70,7 @@ function ListaProdutos() {
 
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
-            {/* --- CABEÇALHO DA PÁGINA (Nenhuma mudança necessária) --- */}
+            {/* --- CABEÇALHO DA PÁGINA --- */}
             <Box sx={{ 
                 display: 'flex', 
                 justifyContent: 'space-between', 
@@ -96,7 +94,7 @@ function ListaProdutos() {
             {/* --- TABELA (MUI) --- */}
             <TableContainer component={Paper}>
                 <Table>
-                    {/* Cabeçalho (Nenhuma mudança) */}
+                    {/* Cabeçalho */}
                     <TableHead>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 'bold' }}>Nome</TableCell>
@@ -108,31 +106,31 @@ function ListaProdutos() {
                         </TableRow>
                     </TableHead>
                     
-                    {/* Corpo da Tabela (AQUI ESTÃO AS MUDANÇAS) */}
+                    {/* Corpo da Tabela  */}
                     <TableBody>
                         {produtos.map(produto => (
                             <TableRow 
-                                // 1. (MUDANÇA) 'key' usa a nova PK do SQL
+                                // 1. 'key' usa a nova PK do SQL
                                 key={produto.ID_produto}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
-                                {/* 2. (MUDANÇA) 'nome' agora é 'Nome' */}
+                                {/* 2. 'nome' agora é 'Nome' */}
                                 <TableCell sx={{ fontWeight: 500 }}>{produto.Nome}</TableCell>
                                 
-                                {/* 3. (MUDANÇA) 'preco' agora é 'Preco' */}
+                                {/* 3. 'preco' agora é 'Preco' */}
                                 <TableCell>
                                     R$ {Number(produto.Preco).toFixed(2).replace('.', ',')}
                                 </TableCell>
                                 
-                                {/* 4. (MUDANÇA) 'estoque' agora é 'Estoque' */}
+                                {/* 4. 'estoque' agora é 'Estoque' */}
                                 <TableCell>{produto.Estoque}</TableCell>
                                 
-                                {/* 5. (MUDANÇA) 'categoria.nome' agora é 'categoria.Nome' */}
+                                {/* 5. 'categoria.nome' agora é 'categoria.Nome' */}
                                 <TableCell>
                                     {produto.categoria ? produto.categoria.Nome : 'N/A'}
                                 </TableCell>
                                 
-                                {/* 6. (MUDANÇA) Esta é a maior mudança. */}
+                                {/* 6. Esta é a maior mudança. */}
                                 {/* O nome do Vendedor agora está em 'vendedor.usuarioBase.Nome' */}
                                 <TableCell>
                                     {produto.vendedor && produto.vendedor.usuarioBase 
@@ -143,7 +141,7 @@ function ListaProdutos() {
                                 <TableCell align="right">
                                     <Button 
                                         component={Link} 
-                                        // 7. (MUDANÇA) Link usa a nova PK
+                                        // 7. Link usa a nova PK
                                         to={`/produtos/editar/${produto.ID_produto}`} 
                                         variant="text" 
                                         color="primary" 
@@ -158,7 +156,7 @@ function ListaProdutos() {
                 </Table>
             </TableContainer>
             
-            {/* Mensagem de Tabela Vazia (Nenhuma mudança) */}
+            {/* Mensagem de Tabela Vazia */}
             {produtos.length === 0 && (
                  <Typography color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
                      Nenhum produto cadastrado no momento.

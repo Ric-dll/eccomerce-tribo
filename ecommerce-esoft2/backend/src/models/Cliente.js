@@ -1,4 +1,3 @@
-// backend/src/models/Cliente.js
 import { Model, DataTypes } from 'sequelize';
 
 class Cliente extends Model {

@@ -1,5 +1,3 @@
-// frontend/src/pages/CadastroCategoria.jsx (CORRIGIDO)
-
 import React, { useState, useEffect } from 'react';
 import CategoriaService from '../services/CategoriaService';
 import { Link } from 'react-router-dom'; 
@@ -18,7 +16,7 @@ import {
 import SendIcon from '@mui/icons-material/Send'; // Ícone do botão
 
 function CadastroCategoria() {
-    // 1. (MUDANÇA) O estado inicial agora usa os nomes da API SQL
+    // 1. (TIvemos que aplicar uma mudança) O estado inicial agora usa os nomes da API SQL
     const [formData, setFormData] = useState({ 
         Nome: '', 
         Descricao: '', 
@@ -37,8 +35,7 @@ function CadastroCategoria() {
             .catch(error => console.error("Erro ao buscar categorias:", error));
     }, []);
 
-    // Esta função (handleChange) funciona como estava,
-    // pois ela lê o 'name' do e.target
+    // A função lê o 'name' do e.target
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -48,7 +45,7 @@ function CadastroCategoria() {
         setMessage('');
         setLoading(true);
 
-        // 2. (MUDANÇA) Prepara os dados para envio com os nomes corretos
+        // 2. Prepara os dados para envio com os nomes corretos
         const dataToSubmit = {
             ...formData,
             // Garante que o valor enviado seja 'null' se estiver vazio
@@ -58,10 +55,10 @@ function CadastroCategoria() {
         try {
             await CategoriaService.cadastrarCategoria(dataToSubmit);
             
-            // 3. (MUDANÇA) Mensagem de sucesso (usei um emoji para diferenciar)
-            setMessage('✅ Categoria cadastrada com sucesso!');
+            // 3. Mensagem de sucesso (usei um emoji para diferenciar)
+            setMessage('Categoria cadastrada com sucesso!');
             
-            // 4. (MUDANÇA) Reseta o formulário para os novos nomes de estado
+            // 4. Reseta o formulário para os novos nomes de estado
             setFormData({ Nome: '', Descricao: '', Categoria_pai_ID: '' });
             
             // Atualiza a lista
@@ -127,7 +124,7 @@ function CadastroCategoria() {
                         onSubmit={handleSubmit} 
                         sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
                     >
-                        {/* 5. (MUDANÇA) O 'name' agora é "Nome" (maiúsculo) */}
+                        {/* 5. (Aplicação de MUDANÇA) O 'name' agora é "Nome" (maiúsculo) */}
                         <TextField 
                             label="Nome da Categoria" 
                             name="Nome" 
@@ -137,7 +134,7 @@ function CadastroCategoria() {
                             fullWidth
                         />
                         
-                        {/* 6. (MUDANÇA) O 'name' agora é "Descricao" (maiúsculo) */}
+                        {/* 6. (Aplicação de MUDANÇA) O 'name' agora é "Descricao" (maiúsculo) */}
                         <TextField 
                             label="Descrição" 
                             name="Descricao" 
@@ -148,7 +145,7 @@ function CadastroCategoria() {
                             rows={4}      
                         />
                         
-                        {/* 7. (MUDANÇA) O 'name' agora é "Categoria_pai_ID" */}
+                        {/* 7. (Aplicação de MUDANÇA) O 'name' agora é "Categoria_pai_ID" */}
                         <TextField 
                             label="Categoria Pai"
                             name="Categoria_pai_ID"
@@ -161,7 +158,7 @@ function CadastroCategoria() {
                                 <em>Nenhuma (Categoria Raiz)</em>
                             </MenuItem>
                             
-                            {/* 8. (MUDANÇA) O 'key' e 'value' usam 'ID_categoria' */}
+                            {/* 8. (Aplicação de MUDANÇA) O 'key' e 'value' usam 'ID_categoria' */}
                             {categorias.map(cat => (
                                 <MenuItem key={cat.ID_categoria} value={cat.ID_categoria}>
                                     {cat.Nome} {/* cat.Nome já deve estar correto vindo da API */}

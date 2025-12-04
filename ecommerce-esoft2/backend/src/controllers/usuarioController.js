@@ -1,6 +1,3 @@
-// backend/src/controllers/UsuarioController.js
-
-// Importamos todos os modelos necessários e o sequelize (para transações)
 import { models, sequelize } from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import { Op } from 'sequelize';
@@ -80,7 +77,7 @@ const cadastrarCliente = async (req, res) => {
 // [POST] Endpoint de Cadastro de Vendedor
 // [POST] Endpoint de Cadastro de Vendedor (CORRIGIDO)
 const cadastrarVendedor = async (req, res) => {
-    // (MUDANÇA): Campos com nomes do BD
+    // Campos com nomes do BD
     const {Nome, Email, Senha, Telefone, AreaResponsavel} = req.body;
     
     const t = await sequelize.transaction();
@@ -98,11 +95,11 @@ const cadastrarVendedor = async (req, res) => {
             return res.status(500).json({ mensagem: 'Tipo de usuário "Vendedor" não encontrado.' });
         }
 
-        // (MUDANÇA): Usamos a 'Senha'
+        //Usamos a 'Senha'
         const salt = await bcrypt.genSalt(10);
         const senhaHash = await bcrypt.hash(Senha, salt);
 
-        // (MUDANÇA): Mapeamento direto
+        //apeamento direto
         const novoUsuario = await Usuario.create({
             Nome: Nome, Email: Email, Senha_hash: senhaHash, Telefone: Telefone,
             Ativo: true, TipoUsuario_ID: tipoVendedor.ID_Tipo, Data_cadastro: new Date()

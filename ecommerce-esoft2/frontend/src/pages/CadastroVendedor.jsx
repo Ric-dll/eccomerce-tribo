@@ -1,5 +1,3 @@
-// frontend/src/pages/CadastroVendedor.jsx (CORRIGIDO E COMPLETO)
-
 import React, { useState } from 'react';
 import UsuarioService from '../services/UsuarioService';
 import { Link } from 'react-router-dom';
@@ -17,19 +15,17 @@ import {
 import SendIcon from '@mui/icons-material/Send'; // Ícone do botão
 
 function CadastroVendedor() {
-    // 1. (MUDANÇA) Estado do formulário usa os nomes da API SQL
     const [formData, setFormData] = useState({
         Nome: '',
         Email: '',
         Senha: '',
         Telefone: '',
-        AreaResponsavel: '', // Antes era 'areaResponsavel'
+        AreaResponsavel: '', 
     });
     
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // O 'handleChange' genérico continua funcionando perfeitamente
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -40,13 +36,10 @@ function CadastroVendedor() {
         setLoading(true);
 
         try {
-            // O 'formData' já está no formato correto que o backend espera
             await UsuarioService.cadastrarVendedor(formData);
             
-            // 2. (MUDANÇA) Mensagem de sucesso padronizada
-            setMessage('✅ Vendedor cadastrado com sucesso!');
+            setMessage('Vendedor cadastrado com sucesso!');
             
-            // 3. (MUDANÇA) Resetar o formulário com os nomes corretos
             setFormData({ Nome: '', Email: '', Senha: '', Telefone: '', AreaResponsavel: '' });
 
         } catch (error) {
@@ -115,7 +108,6 @@ function CadastroVendedor() {
                     
                     {/* Mensagem de Alerta (Sucesso/Erro) */}
                     {message && (
-                        // 4. (MUDANÇA) Lógica do Alert corrigida
                         <Alert 
                             severity={message.startsWith('✅') ? 'success' : 'error'} 
                             sx={{ mb: 2 }} 
@@ -130,7 +122,7 @@ function CadastroVendedor() {
                         onSubmit={handleSubmit} 
                         sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
                     >
-                        {/* 5. (MUDANÇA) 'name' e 'value' dos TextFields atualizados */}
+                        {/* 5. 'name' e 'value' dos TextFields atualizados */}
                         <TextField 
                             label="Nome" 
                             name="Nome" 

@@ -1,4 +1,3 @@
-// backend/src/controllers/pedidoController.js
 import { models, sequelize } from '../config/db.js';
 
 // POST /api/pedidos/finalizar

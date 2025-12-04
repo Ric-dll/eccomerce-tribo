@@ -1,4 +1,3 @@
-// backend/src/models/StatusPedido.js
 import { Model, DataTypes } from 'sequelize';
 
 class StatusPedido extends Model {

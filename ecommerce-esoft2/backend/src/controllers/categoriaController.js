@@ -1,5 +1,3 @@
-// backend/src/controllers/CategoriaController.js
-
 import { models } from '../config/db.js';
 const { Categoria } = models;
 import { Op } from 'sequelize';

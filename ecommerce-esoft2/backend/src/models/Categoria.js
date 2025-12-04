@@ -1,4 +1,3 @@
-// backend/src/models/Categoria.js
 import { Model, DataTypes } from 'sequelize';
 
 class Categoria extends Model {

@@ -1,4 +1,3 @@
-// backend/src/models/ImagemProduto.js
 import { Model, DataTypes } from 'sequelize';
 
 class ImagemProduto extends Model {

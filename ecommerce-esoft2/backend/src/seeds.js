@@ -1,220 +1,229 @@
-// backend/src/seeds.js (VERSÃO FINAL COMPLETA - Garante E-mail Único)
-
 import { sequelize, models } from './config/db.js';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 
-// IDs das subcategorias que VAMOS CRIAR (Camisetas, Polo, Jeans, Bermudas, Bonés)
+// IDs das subcategorias (Camisetas, Polo, Jeans, Bermudas, Bonés)
 const CATEGORIA_IDS = [4, 5, 6, 7, 8];
-
-// IDs dos Tipos de Usuário que VAMOS CRIAR
 const TIPO_CLIENTE_ID = 1;
 const TIPO_VENDEDOR_ID = 2;
 
-// Arrays de dados para gerar produtos realistas
-const MARCAS = ["Tribo Urbana", "Hype", "Basic", "Flow", "Urban", "Element", "Core"];
-const TIPOS_CAMISETA = ["Estampada", "Básica", "Gola V", "Regata", "Manga Longa", "Oversized"];
-const TIPOS_JEANS = ["Slim Fit", "Reta", "Skinny", "Destroyed", "Comfort", "Baggy"];
-const TIPOS_BERMUDA = ["Sarja", "Moletom", "Cargo", "Chino", "Jeans"];
-const TIPOS_POLO = ["Piquet", "Malha", "Listrada", "Lisa"];
-const TIPOS_BONE = ["Aba Curva", "Aba Reta", "Trucker", "Dad Hat"];
-const CORES = ["Preta", "Branca", "Cinza Mescla", "Azul Marinho", "Vermelha", "Verde Musgo", "Bege"];
-const LAVAGENS_JEANS = ["Clássica", "Escura", "Destroyed", "Delavê"];
+// --- DADOS RICOS (Do seu script antigo) ---
+const MARCAS = ["Tribo Urbana", "Hype", "Basic", "Flow", "Urban", "Element", "Core", "Vibe", "Zenith"];
+const TIPOS_CAMISETA = ["Estampada", "Básica", "Gola V", "Regata", "Manga Longa", "Oversized", "Slim"];
+const TIPOS_JEANS = ["Slim Fit", "Reta", "Skinny", "Destroyed", "Comfort", "Baggy", "Jogger"];
+const TIPOS_BERMUDA = ["Sarja", "Moletom", "Cargo", "Chino", "Jeans", "Surf"];
+const TIPOS_POLO = ["Piquet", "Malha", "Listrada", "Lisa", "Com Bolso"];
+const TIPOS_BONE = ["Aba Curva", "Aba Reta", "Trucker", "Dad Hat", "Snapback"];
+const CORES = ["Preta", "Branca", "Cinza Mescla", "Azul Marinho", "Vermelha", "Verde Musgo", "Bege", "Amarela", "Vinho"];
+const LAVAGENS_JEANS = ["Clássica", "Escura", "Destroyed", "Delavê", "Stone Washed", "Preta"];
 
-// --- NOSSAS FUNÇÕES "FÁBRICA" ---
+// --- FUNÇÕES FÁBRICA ---
 
 const gerarTelefone = () => `(11) 9${faker.string.numeric(4)}-${faker.string.numeric(4)}`;
 
-// 1. (MUDANÇA) Adicionado 'i' (índice) para garantir email único
 async function criarVendedor(area, i) { 
     const nome = faker.person.firstName();
     const sobrenome = faker.person.lastName();
-
     const usuario = await models.Usuario.create({
         Nome: `${nome} ${sobrenome} (Vendedor)`,
-        // 2. (MUDANÇA) Adicionado 'i' ao sobrenome para o email
-        Email: faker.internet.email({ firstName: nome, lastName: `${sobrenome}${i}`, provider: 'loja.com' }),
+        Email: faker.internet.email({ firstName: nome, lastName: `Vend${i}`, provider: 'loja.com' }),
         Senha_hash: '$2a$10$fakehash...senha123',
         Telefone: gerarTelefone(), Data_cadastro: new Date(), TipoUsuario_ID: TIPO_VENDEDOR_ID, Ativo: true,
     });
-    
-    await models.Vendedor.create({
-        ID_usuario: usuario.ID_usuario, AreaResponsavel: area,
-    });
+    await models.Vendedor.create({ ID_usuario: usuario.ID_usuario, AreaResponsavel: area });
     return usuario;
 }
 
-// 3. (MUDANÇA) Adicionado 'i' (índice) para garantir email único
 async function criarCliente(i) {
     const nome = faker.person.firstName();
     const sobrenome = faker.person.lastName();
-
     const usuario = await models.Usuario.create({
         Nome: `${nome} ${sobrenome}`,
-        // 4. (MUDANÇA) Adicionado 'i' ao sobrenome para o email
-        Email: faker.internet.email({ firstName: nome, lastName: `${sobrenome}${i}`, provider: 'cliente.com' }),
+        Email: faker.internet.email({ firstName: nome, lastName: `Cli${i}`, provider: 'cliente.com' }),
         Senha_hash: '$2a$10$fakehash...senha123',
         Telefone: gerarTelefone(), Data_cadastro: new Date(), TipoUsuario_ID: TIPO_CLIENTE_ID, Ativo: true,
     });
-    
     await models.Cliente.create({
         ID_usuario: usuario.ID_usuario,
-        CPF: faker.string.numeric(11), // Correção do CPF
+        CPF: faker.string.numeric(11), 
         DataNasc: faker.date.birthdate({ min: 18, max: 65, mode: 'age' }),
     });
     return usuario;
 }
 
-// Função 'criarProduto' não recebe mais 'vendedorId'
+// Lógica RICA de criação de produtos
 async function criarProduto() {
     const catId = faker.helpers.arrayElement(CATEGORIA_IDS);
     let nomeProduto = '';
+    let descricaoProduto = '';
 
+    // Seleciona nome baseado na categoria usando os arrays ricos
     switch (catId) {
-        case 4: 
-            nomeProduto = `Camiseta ${faker.helpers.arrayElement(TIPOS_CAMISETA)} ${faker.helpers.arrayElement(MARCAS)} (${faker.helpers.arrayElement(CORES)})`;
+        case 4: // Camisetas
+            const tipoC = faker.helpers.arrayElement(TIPOS_CAMISETA);
+            nomeProduto = `Camiseta ${tipoC} ${faker.helpers.arrayElement(MARCAS)} (${faker.helpers.arrayElement(CORES)})`;
+            descricaoProduto = `Camiseta estilo ${tipoC} confeccionada em algodão de alta qualidade. Ideal para o dia a dia.`;
             break;
-        case 5: 
-            nomeProduto = `Camisa Polo ${faker.helpers.arrayElement(TIPOS_POLO)} (${faker.helpers.arrayElement(CORES)})`;
+        case 5: // Polo
+            const tipoP = faker.helpers.arrayElement(TIPOS_POLO);
+            nomeProduto = `Camisa Polo ${tipoP} ${faker.helpers.arrayElement(MARCAS)} (${faker.helpers.arrayElement(CORES)})`;
+            descricaoProduto = `Polo ${tipoP} elegante e confortável. Acabamento premium.`;
             break;
-        case 6: 
-            nomeProduto = `Calça Jeans ${faker.helpers.arrayElement(TIPOS_JEANS)} (${faker.helpers.arrayElement(LAVAGENS_JEANS)})`;
+        case 6: // Jeans
+            const tipoJ = faker.helpers.arrayElement(TIPOS_JEANS);
+            const lavagem = faker.helpers.arrayElement(LAVAGENS_JEANS);
+            nomeProduto = `Calça Jeans ${tipoJ} ${lavagem}`;
+            descricaoProduto = `Jeans ${tipoJ} com lavagem ${lavagem}. Durabilidade e estilo para qualquer ocasião.`;
             break;
-        case 7: 
-            nomeProduto = `Bermuda ${faker.helpers.arrayElement(TIPOS_BERMUDA)} (${faker.helpers.arrayElement(CORES)})`;
+        case 7: // Bermudas
+            const tipoB = faker.helpers.arrayElement(TIPOS_BERMUDA);
+            nomeProduto = `Bermuda ${tipoB} ${faker.helpers.arrayElement(MARCAS)} (${faker.helpers.arrayElement(CORES)})`;
+            descricaoProduto = `Bermuda ${tipoB} leve e versátil. Perfeita para dias quentes.`;
             break;
-        case 8: 
-            nomeProduto = `Boné ${faker.helpers.arrayElement(TIPOS_BONE)} (${faker.helpers.arrayElement(CORES)})`;
+        case 8: // Bonés
+            const tipoBo = faker.helpers.arrayElement(TIPOS_BONE);
+            nomeProduto = `Boné ${tipoBo} ${faker.helpers.arrayElement(MARCAS)} (${faker.helpers.arrayElement(CORES)})`;
+            descricaoProduto = `Boné estilo ${tipoBo} com ajuste regulável e bordado exclusivo.`;
             break;
-        default:
-            nomeProduto = "Produto Genérico"; // Fallback
     }
 
-    await models.Produto.create({
+    return await models.Produto.create({
         Nome: nomeProduto,
-        Descricao: `Produto de alta qualidade: ${nomeProduto}. 100% Algodão.`,
-        Preco: faker.commerce.price({ min: 79, max: 350, dec: 2 }),
-        Estoque: faker.number.int({ min: 20, max: 200 }),
+        Descricao: descricaoProduto,
+        Preco: faker.commerce.price({ min: 50, max: 300, dec: 2 }),
+        Estoque: faker.number.int({ min: 50, max: 500 }), 
         Ativo: true, 
         Categoria_ID: catId, 
-        Vendedor_ID: null // Vendedor_ID agora é nulo
+        Vendedor_ID: null
     });
 }
 
-// --- FUNÇÕES DE CONTROLE DO SCRIPT ---
+// --- VENDAS HISTÓRICAS (O segredo do Dashboard) ---
+async function criarVendasPassadas(clientes, produtos) {
+    console.log("⏳ Gerando histórico de vendas...");
+    const TOTAL_VENDAS_FAKE = 200; // Aumentei um pouco
+    const vendasPromessas = [];
+
+    for (let i = 0; i < TOTAL_VENDAS_FAKE; i++) {
+        const dataVenda = faker.date.recent({ days: 30 });
+        const cliente = faker.helpers.arrayElement(clientes);
+        
+        // Cada venda tem de 1 a 4 produtos
+        const qtdItens = faker.number.int({ min: 1, max: 4 });
+        const produtosEscolhidos = faker.helpers.arrayElements(produtos, qtdItens);
+        
+        let totalPedido = 0;
+        const itensParaSalvar = [];
+
+        for (const prod of produtosEscolhidos) {
+            const qtd = faker.number.int({ min: 1, max: 3 });
+            const preco = parseFloat(prod.Preco);
+            totalPedido += (preco * qtd);
+
+            itensParaSalvar.push({
+                Quantidade: qtd,
+                PrecoUnitario: preco,
+                Produto_ID: prod.ID_produto
+            });
+        }
+
+        const vendaProcesso = async () => {
+            const pedido = await models.Pedido.create({
+                DataPedido: dataVenda,
+                Total: totalPedido,
+                StatusPedido_ID: 4, // Entregue
+                Cliente_ID: cliente.clienteInfo.ID_usuario,
+                EnderecoEntrega_ID: 1
+            });
+
+            const itensComID = itensParaSalvar.map(item => ({ ...item, Pedido_ID: pedido.ID_pedido }));
+            await models.ItemPedido.bulkCreate(itensComID);
+        };
+        vendasPromessas.push(vendaProcesso());
+    }
+    await Promise.all(vendasPromessas);
+    console.log(`✅ ${TOTAL_VENDAS_FAKE} Vendas históricas criadas!`);
+}
+
+// --- CONTROLE DO SCRIPT ---
 
 async function limparBanco() {
-    console.log("Desligando verificação de chaves estrangeiras...");
     await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
-    
-    console.log("Limpando (TRUNCATE) tabelas...");
-    const tabelasParaLimpar = [
-        'ImagemProduto', 'Produto', 'Categoria', 
-        'Cliente', 'Vendedor', 'Usuario'
-        // Deixamos TipoUsuario de fora de propósito
-    ];
-    
-    for (const tabela of tabelasParaLimpar) {
-        await sequelize.query(`TRUNCATE TABLE ${tabela}`);
-    }
-    
-    console.log("Ligando verificação de chaves estrangeiras...");
+    // Limpa todas as tabelas (incluindo as de pedido)
+    const tabelas = ['ItemPedido', 'Pedido', 'ItemCarrinho', 'Carrinho', 'ImagemProduto', 'Produto', 'Categoria', 'Cliente', 'Vendedor', 'Usuario'];
+    for (const t of tabelas) await sequelize.query(`TRUNCATE TABLE ${t}`);
     await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
     console.log("✅ Banco limpo!");
 }
 
 async function criarDadosBase() {
-    console.log("Criando Tipos de Usuário...");
-    // O 'ignore' previne erro se eles já existirem
     await models.TipoUsuario.bulkCreate([
-        { ID_Tipo: TIPO_CLIENTE_ID, Nome: 'Cliente' },
-        { ID_Tipo: TIPO_VENDEDOR_ID, Nome: 'Vendedor' },
-        { ID_Tipo: 3, Nome: 'Administrador' },
-        { ID_Tipo: 4, Nome: 'ResponsavelLogistica' }
+        { ID_Tipo: 1, Nome: 'Cliente' }, { ID_Tipo: 2, Nome: 'Vendedor' },
+        { ID_Tipo: 3, Nome: 'Administrador' }, { ID_Tipo: 4, Nome: 'ResponsavelLogistica' }
     ], { ignoreDuplicates: true });
 
-    console.log("Criando Categorias Base...");
-    // Categorias Raiz
+    await models.StatusPedido.bulkCreate([
+        { ID_StatusPedido: 1, Nome: 'Aguardando Pagamento' },
+        { ID_StatusPedido: 2, Nome: 'Processando' },
+        { ID_StatusPedido: 3, Nome: 'Enviado' },
+        { ID_StatusPedido: 4, Nome: 'Entregue' }, 
+        { ID_StatusPedido: 5, Nome: 'Cancelado' }
+    ], { ignoreDuplicates: true });
+
     await models.Categoria.bulkCreate([
-        { ID_categoria: 1, Nome: 'Camisas', Descricao: 'Camisetas, camisas polo e sociais.', Categoria_pai_ID: null },
-        { ID_categoria: 2, Nome: 'Calças', Descricao: 'Jeans, sarja e bermudas.', Categoria_pai_ID: null },
-        { ID_categoria: 3, Nome: 'Acessórios', Descricao: 'Bonés, cintos e carteiras.', Categoria_pai_ID: null }
+        { ID_categoria: 1, Nome: 'Roupas', Categoria_pai_ID: null },
+        { ID_categoria: 2, Nome: 'Calças', Categoria_pai_ID: null },
+        { ID_categoria: 3, Nome: 'Acessórios', Categoria_pai_ID: null }
     ]);
     
-    // Sub-Categorias (com os IDs que o 'criarProduto' espera)
     await models.Categoria.bulkCreate([
-        { ID_categoria: 4, Nome: 'Camisetas', Descricao: 'Camisetas básicas e estampadas.', Categoria_pai_ID: 1 },
-        { ID_categoria: 5, Nome: 'Camisas Polo', Descricao: 'Polos de piquet e algodão.', Categoria_pai_ID: 1 },
-        { ID_categoria: 6, Nome: 'Jeans', Descricao: 'Calças jeans de diversas lavagens.', Categoria_pai_ID: 2 },
-        { ID_categoria: 7, Nome: 'Bermudas', Descricao: 'Bermudas de sarja e moletom.', Categoria_pai_ID: 2 },
-        { ID_categoria: 8, Nome: 'Bonés', Descricao: 'Bonés aba curva e aba reta.', Categoria_pai_ID: 3 }
+        { ID_categoria: 4, Nome: 'Camisetas', Categoria_pai_ID: 1 },
+        { ID_categoria: 5, Nome: 'Camisas Polo', Categoria_pai_ID: 1 },
+        { ID_categoria: 6, Nome: 'Jeans', Categoria_pai_ID: 2 },
+        { ID_categoria: 7, Nome: 'Bermudas', Categoria_pai_ID: 2 },
+        { ID_categoria: 8, Nome: 'Bonés', Categoria_pai_ID: 3 }
     ]);
-    
-    console.log("✅ Dados base (Tipos e Categorias) criados!");
+    console.log("Dados base criados!");
 }
-
-
-// --- O SCRIPT PRINCIPAL ---
 
 const popularBanco = async () => {
     try {
-        console.log("Iniciando script de povoamento...");
         await sequelize.authenticate();
-        console.log("Conexão estabelecida.");
-
-        // --- QUANTIDADES ---
-        const TOTAL_VENDEDORES = 10;
-        const TOTAL_CLIENTES = 200;
-        const TOTAL_PRODUTOS = 400;
-        // -------------------
-
-        // 1. LIMPA O BANCO
         await limparBanco();
-        
-        // 2. CRIA OS DADOS ESSENCIAIS
         await criarDadosBase();
 
-        // 3. CRIA OS VENDEDORES
-        console.log(`\nCriando ${TOTAL_VENDEDORES} Vendedores...`);
-        const vendedoresCriados = [];
-        const areasVenda = ["Camisetas", "Calças", "Acessórios", "Estoque", "Gerência", "Social", "Esportivo", "Tênis", "Relógios", "Básico"];
-        for (let i = 0; i < TOTAL_VENDEDORES; i++) {
-            // 5. (MUDANÇA) Passando 'i' para a função
-            const vendedor = await criarVendedor(areasVenda[i % areasVenda.length], i);
-            vendedoresCriados.push(vendedor);
-        }
-        console.log("✅ Vendedores criados!");
+        // 1. Vendedores (5)
+        const vendedores = [];
+        for (let i = 0; i < 5; i++) vendedores.push(await criarVendedor("Geral", i));
+        console.log("✅ Vendedores criados");
 
-        // 4. CRIA OS CLIENTES
-        console.log(`\nCriando ${TOTAL_CLIENTES} Clientes...`);
-        const promessasClientes = [];
-        for (let i = 0; i < TOTAL_CLIENTES; i++) {
-            // 6. (MUDANÇA) Passando 'i' para a função
-            promessasClientes.push(criarCliente(i));
+        // 2. Clientes (50)
+        const clientes = [];
+        for (let i = 0; i < 50; i++) {
+            const usuario = await criarCliente(i);
+            const clienteCompleto = await models.Usuario.findByPk(usuario.ID_usuario, {
+                include: [{ model: models.Cliente, as: 'clienteInfo' }]
+            });
+            clientes.push(clienteCompleto);
         }
-        await Promise.all(promessasClientes);
-        console.log("✅ Clientes criados!");
+        console.log("Clientes criados");
         
-        // 5. CRIA OS PRODUTOS
-        console.log(`\nCriando ${TOTAL_PRODUTOS} Produtos...`);
-        const promessasProdutos = [];
-        for (let i = 0; i < TOTAL_PRODUTOS; i++) {
-            promessasProdutos.push(criarProduto()); // Não passa mais ID de vendedor
-        }
-        await Promise.all(promessasProdutos); 
-        console.log("✅ Produtos criados!");
+        // 3. Produtos (150 - Aumentado para ter mais variedade)
+        const produtos = [];
+        for (let i = 0; i < 150; i++) produtos.push(await criarProduto());
+        console.log("Produtos criados");
 
+        // 4. VENDAS HISTÓRICAS
+        await criarVendasPassadas(clientes, produtos);
 
         console.log("\n-----------------------------------------");
-        console.log("🎉 BANCO POPULADO COM SUCESSO! 🎉");
+        console.log("  BANCO POPULADO: DADOS RICOS + VENDAS!  ");
         console.log("-----------------------------------------");
 
     } catch (error) {
-        console.error("\n❌ ERRO AO POPULAR O BANCO:", error);
+        console.error("\n❌ ERRO:", error);
     } finally {
-        // Fecha a conexão para o script terminar
         await sequelize.close();
     }
 };
 
-// Inicia o script
 popularBanco();

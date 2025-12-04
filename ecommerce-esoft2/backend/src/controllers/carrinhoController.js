@@ -1,4 +1,3 @@
-// backend/src/controllers/carrinhoController.js
 import { models } from '../config/db.js';
 
 // Função utilitária para buscar ou criar o carrinho de um cliente

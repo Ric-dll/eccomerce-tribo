@@ -1,4 +1,3 @@
-// backend/src/controllers/adminController.js
 import { models, sequelize } from '../config/db.js';
 import { Op, fn, col } from 'sequelize';
 
